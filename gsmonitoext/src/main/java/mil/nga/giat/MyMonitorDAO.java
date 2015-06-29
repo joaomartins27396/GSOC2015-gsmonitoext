@@ -9,12 +9,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.datatype.DatatypeFactory;
+
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.impl.CatalogImpl;
+import org.geoserver.catalog.impl.DefaultCatalogFacade;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.MonitorDAO;
 import org.geoserver.monitor.RequestData;
 import org.geoserver.monitor.RequestDataVisitor;
+import org.geotools.data.AbstractDataStoreFactory;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataStoreFinder;
@@ -25,6 +29,7 @@ import org.geotools.data.FeatureWriter;
 import org.geotools.data.Query;
 import org.geotools.data.Transaction;
 import org.geotools.data.property.PropertyDataStoreFactory;
+import org.geotools.data.wfs.WFSDataStoreFactory;
 import org.geotools.feature.SchemaException;
 import org.geotools.filter.FilterFactoryImpl;
 import org.geotools.gce.imagemosaic.catalog.index.Indexer.Datastore;
@@ -36,7 +41,8 @@ import org.opengis.filter.expression.Expression;
 import org.geoserver.monitor.MonitorConfig.Mode;
 
 public class MyMonitorDAO implements MonitorDAO {
-
+	
+	
 	public static enum Sync {
 		SYNC, ASYNC, ASYNC_UPDATE;
 	}
@@ -96,6 +102,8 @@ public class MyMonitorDAO implements MonitorDAO {
 		// For testing, somehow parameterize this to use a shape file store.
 		// The latest version of documentation suggests using a Catalog.
 		final Map<String, Serializable> params = dataStoreParams;
+		
+		
 
 		for (Iterator<?> i = DataStoreFinder.getAvailableDataStores(); i
 				.hasNext();) {
@@ -137,7 +145,7 @@ public class MyMonitorDAO implements MonitorDAO {
 		} else {
 			// don't persist yet, we persist at the very end of request
 		}
-		return null;
+		return data;
 	}
 
 	@Override
