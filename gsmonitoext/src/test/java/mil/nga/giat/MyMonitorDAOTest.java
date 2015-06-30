@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.RequestData;
 import org.geotools.data.property.PropertyDataStoreFactory;
+import org.geotools.jdbc.JDBCDataStoreFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,7 +26,15 @@ public class MyMonitorDAOTest
                 "testdata");
         if (dataDir.exists()) FileUtils.deleteDirectory(dataDir);
         if (!dataDir.exists()) dataDir.mkdirs();
-        Map params = new HashMap();
+        
+        
+        
+        HashMap params=new HashMap();
+        params.put(JDBCDataStoreFactory.NAMESPACE.key,MockData.DEFAULT_URI);
+        params.put(JDBCDataStoreFactory.DATABASE.key,"some database path");
+        params.put(JDBCDataStoreFactory.DBTYPE.key,"h2");
+        
+        
         params.put(
                 PropertyDataStoreFactory.DIRECTORY.key,
                 dataDir.getAbsolutePath().toString());

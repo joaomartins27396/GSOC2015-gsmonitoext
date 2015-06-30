@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: mil.nga.giat.MyMonitorDAOTest
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.09 sec <<< FAILURE!
-initializationError(mil.nga.giat.MyMonitorDAOTest)  Time elapsed: 0.011 sec  <<< ERROR!
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.067 sec <<< FAILURE!
+initializationError(mil.nga.giat.MyMonitorDAOTest)  Time elapsed: 0.005 sec  <<< ERROR!
 java.lang.NoClassDefFoundError: org/geoserver/monitor/MonitorDAO
 	at java.lang.ClassLoader.defineClass1(Native Method)
 	at java.lang.ClassLoader.defineClass(ClassLoader.java:760)
