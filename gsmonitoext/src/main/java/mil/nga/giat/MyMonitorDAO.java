@@ -184,11 +184,14 @@ public class MyMonitorDAO implements MonitorDAO {
 		}
 	}
 
-	private void toSimpleFeature(SimpleFeature featureToUpdate, RequestData data) {
+	private void toSimpleFeature(
+			SimpleFeature featureToUpdate,
+			RequestData data ) {
 		//
 	}
-
-	private void toRequestData(SimpleFeature feature, RequestData dataToUpdate) {
+	private void toRequestData(
+			SimpleFeature feature,
+			RequestData dataToUpdate ) {
 		//
 	}
 
@@ -291,8 +294,9 @@ public class MyMonitorDAO implements MonitorDAO {
 	}
 
 	@Override
-	public List<RequestData> getRequests(org.geoserver.monitor.Query arg0) {
-		// TODO Auto-generated method stub
+	public List<RequestData> getRequests(
+			org.geoserver.monitor.Query query ) {
+		// TODO Auto-generated method stub....
 		return null;
 	}
 
