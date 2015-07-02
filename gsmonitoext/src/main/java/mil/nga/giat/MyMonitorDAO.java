@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -42,8 +43,7 @@ import org.geoserver.monitor.MonitorConfig.Mode;
 import org.geoserver.ows.util.OwsUtils;
 
 public class MyMonitorDAO implements MonitorDAO {
-	
-	
+
 	public static enum Sync {
 		SYNC, ASYNC, ASYNC_UPDATE;
 	}
@@ -58,8 +58,7 @@ public class MyMonitorDAO implements MonitorDAO {
 	private SimpleFeatureType featureType = null;
 
 	String dataStoreTypeName = TYPENAME;
-	
-	
+
 	private SimpleFeature feature;
 	private RequestData data;
 
@@ -94,7 +93,8 @@ public class MyMonitorDAO implements MonitorDAO {
 		// example...needs more
 		try {
 			featureType = DataUtilities
-					.createType(dataStoreTypeName,
+					.createType(
+							dataStoreTypeName,
 							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date, endTime:Date, totalTime:java.lang.Long");
 		} catch (SchemaException e) {
 			e.printStackTrace();
@@ -106,8 +106,6 @@ public class MyMonitorDAO implements MonitorDAO {
 		// For testing, somehow parameterize this to use a shape file store.
 		// The latest version of documentation suggests using a Catalog.
 		final Map<String, Serializable> params = dataStoreParams;
-		
-		
 
 		for (Iterator<?> i = DataStoreFinder.getAvailableDataStores(); i
 				.hasNext();) {
@@ -188,30 +186,57 @@ public class MyMonitorDAO implements MonitorDAO {
 		}
 	}
 
-	
-	//The DataStore uses SimpleFeatures as structure of data. Each feature represents one entity. 
-	//The monitorDAO uses RequestData as a structure of data. 
-	//To save data in the DataStore, RequestData needs to be manually placed in a SimpleFeature. 
-	//To reproduce RequestData as part of  an answer to a query ('get' methods),
-		//the SimpleFeature attributes need to be manually placed in a RequesData.
-	private void toSimpleFeature(
-			SimpleFeature featureToUpdate,
-			RequestData data ) {
+	// The DataStore uses SimpleFeatures as structure of data. Each feature
+	// represents one entity.
+	// The monitorDAO uses RequestData as a structure of data.
+	// To save data in the DataStore, RequestData needs to be manually placed in
+	// a SimpleFeature.
+	// To reproduce RequestData as part of an answer to a query ('get' methods),
+	// the SimpleFeature attributes need to be manually placed in a RequesData.
+	private void toSimpleFeature(SimpleFeature featureToUpdate, RequestData data) {
+
+		//List<String> list = data.getResources();
+
+		//SimpleFeature feature = new SimpleFeatureBuilder(featureType)
+			//	.buildFeature("fid");
+		List<Object> list = new ArrayList<Object>();
 		
 		
-			List<String> list = data.getResources();
-			
-		 
-		 
-		 
+		//RequestData Atributes
+		list.add(data.getId());
+		list.add(data.getStatus());
+		list.add(data.getPath());
+		list.add(data.getQueryString());
+		list.add(data.getBody());
+		list.add(data.getHttpMethod());
+		list.add(data.getStartTime());
+		list.add(data.getEndTime());
+		list.add(data.getTotalTime());
+		list.add(data.getRemoteAddr());
+		list.add(data.getRemoteHost());
+		list.add(data.getHost());
+		list.add(data.getInternalHost());
+		list.add(data.getRemoteUser());
+		list.add(data.getService());
+		list.add(data.getOperation());
+		list.add(data.getSubOperation());
+		list.add(data.getOwsVersion());
+		list.add(data.getResources());
+		list.add(data.getResponseLength());
+		list.add(data.getResponseContentType());
+		list.add(data.getErrorMessage());
+		list.add(data.getError());
+		list.add(data.getResponseStatus());
+		list.add(data.getHttpReferer());
+		list.add(data.getBbox());
+		
+		featureToUpdate.setAttributes(list);
+
 		//
 	}
-	private void toRequestData(
-			SimpleFeature feature,
-			RequestData dataToUpdate ) {
-		
-		
-		
+
+	private void toRequestData(SimpleFeature feature, RequestData dataToUpdate) {
+
 		//
 	}
 
