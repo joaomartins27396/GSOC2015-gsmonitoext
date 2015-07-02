@@ -18,7 +18,6 @@ import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.MonitorDAO;
 import org.geoserver.monitor.RequestData;
 import org.geoserver.monitor.RequestDataVisitor;
-import org.geotools.data.AbstractDataStoreFactory;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataStoreFinder;
@@ -31,6 +30,7 @@ import org.geotools.data.Transaction;
 import org.geotools.data.property.PropertyDataStoreFactory;
 import org.geotools.data.wfs.WFSDataStoreFactory;
 import org.geotools.feature.SchemaException;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.filter.FilterFactoryImpl;
 import org.geotools.gce.imagemosaic.catalog.index.Indexer.Datastore;
 import org.opengis.feature.simple.SimpleFeature;
@@ -39,6 +39,7 @@ import org.opengis.feature.type.FeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
 import org.geoserver.monitor.MonitorConfig.Mode;
+import org.geoserver.ows.util.OwsUtils;
 
 public class MyMonitorDAO implements MonitorDAO {
 	
@@ -57,6 +58,10 @@ public class MyMonitorDAO implements MonitorDAO {
 	private SimpleFeatureType featureType = null;
 
 	String dataStoreTypeName = TYPENAME;
+	
+	
+	private SimpleFeature feature;
+	private RequestData data;
 
 	// need a way to set/get this via Spring setter/getter
 	private Map<String, Serializable> dataStoreParams;
@@ -89,8 +94,7 @@ public class MyMonitorDAO implements MonitorDAO {
 		// example...needs more
 		try {
 			featureType = DataUtilities
-					.createType(
-							dataStoreTypeName,
+					.createType(dataStoreTypeName,
 							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date, endTime:Date, totalTime:java.lang.Long");
 		} catch (SchemaException e) {
 			e.printStackTrace();
@@ -184,14 +188,30 @@ public class MyMonitorDAO implements MonitorDAO {
 		}
 	}
 
+	
+	//The DataStore uses SimpleFeatures as structure of data. Each feature represents one entity. 
+	//The monitorDAO uses RequestData as a structure of data. 
+	//To save data in the DataStore, RequestData needs to be manually placed in a SimpleFeature. 
+	//To reproduce RequestData as part of  an answer to a query ('get' methods),
+		//the SimpleFeature attributes need to be manually placed in a RequesData.
 	private void toSimpleFeature(
 			SimpleFeature featureToUpdate,
 			RequestData data ) {
+		
+		
+			List<String> list = data.getResources();
+			
+		 
+		 
+		 
 		//
 	}
 	private void toRequestData(
 			SimpleFeature feature,
 			RequestData dataToUpdate ) {
+		
+		
+		
 		//
 	}
 
@@ -294,9 +314,8 @@ public class MyMonitorDAO implements MonitorDAO {
 	}
 
 	@Override
-	public List<RequestData> getRequests(
-			org.geoserver.monitor.Query query ) {
-		// TODO Auto-generated method stub....
+	public List<RequestData> getRequests(org.geoserver.monitor.Query arg0) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

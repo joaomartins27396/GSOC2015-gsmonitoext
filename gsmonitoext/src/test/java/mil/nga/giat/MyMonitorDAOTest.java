@@ -22,22 +22,22 @@ public class MyMonitorDAOTest
     public void setup()
             throws IOException {
 
-        File dataDir = new File(
-                "testdata");
-        if (dataDir.exists()) FileUtils.deleteDirectory(dataDir);
-        if (!dataDir.exists()) dataDir.mkdirs();
+        //File dataDir = new File(
+         //       "testdata");
+        //if (dataDir.exists()) FileUtils.deleteDirectory(dataDir);
+        //if (!dataDir.exists()) dataDir.mkdirs();
         
         
         
         HashMap params=new HashMap();
-        params.put(JDBCDataStoreFactory.NAMESPACE.key,MockData.DEFAULT_URI);
+        params.put(JDBCDataStoreFactory.NAMESPACE.key,"DefaulURI");
         params.put(JDBCDataStoreFactory.DATABASE.key,"some database path");
-        params.put(JDBCDataStoreFactory.DBTYPE.key,"h2");
+       // params.put(JDBCDataStoreFactory.DBTYPE.key,"h2");
         
         
-        params.put(
-                PropertyDataStoreFactory.DIRECTORY.key,
-                dataDir.getAbsolutePath().toString());
+        //params.put(
+        //        PropertyDataStoreFactory.DIRECTORY.key,
+        //        dataDir.getAbsolutePath().toString());
         params.put(
                 PropertyDataStoreFactory.NAMESPACE.key,
                 "http://dao.test.org");
