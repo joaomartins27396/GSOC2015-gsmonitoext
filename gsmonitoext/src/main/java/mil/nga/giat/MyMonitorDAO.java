@@ -34,13 +34,17 @@ import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.filter.FilterFactoryImpl;
 import org.geotools.gce.imagemosaic.catalog.index.Indexer.Datastore;
+import org.geotools.geometry.jts.JTS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
+import org.opengis.geometry.Geometry;
 import org.geoserver.monitor.MonitorConfig.Mode;
 import org.geoserver.ows.util.OwsUtils;
+
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 public class MyMonitorDAO implements MonitorDAO {
 
@@ -89,13 +93,12 @@ public class MyMonitorDAO implements MonitorDAO {
 
 	@Override
 	public void init(MonitorConfig config) {
-
 		// example...needs more
 		try {
 			featureType = DataUtilities
 					.createType(
 							dataStoreTypeName,
-							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date, endTime:Date, totalTime:java.lang.Long");
+							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date, endTime:Date, totalTime:java.lang.Long, featureContentType:java.lang.String, bodyContentType:java.lang.String");
 		} catch (SchemaException e) {
 			e.printStackTrace();
 		}
@@ -110,7 +113,7 @@ public class MyMonitorDAO implements MonitorDAO {
 		for (Iterator<?> i = DataStoreFinder.getAvailableDataStores(); i
 				.hasNext();) {
 			DataStoreFactorySpi factory = (DataStoreFactorySpi) i.next();
-
+			
 			try {
 				if (factory.canProcess(params)) {
 					// hack for geotools bug
@@ -118,7 +121,6 @@ public class MyMonitorDAO implements MonitorDAO {
 						new File(params.get(
 								PropertyDataStoreFactory.DIRECTORY.key)
 								.toString()).delete();
-
 					this.dataStore = factory.createNewDataStore(params);
 
 					if (!dataStore.getNames().contains(
@@ -139,6 +141,19 @@ public class MyMonitorDAO implements MonitorDAO {
 	@Override
 	public RequestData init(RequestData data) {
 		// TODO Auto-generated method stub
+
+		try {
+			featureType = DataUtilities
+					.createType(
+							dataStoreTypeName,
+							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date, endTime:Date, totalTime:java.lang.Long, featureContentType:java.lang.String, bodyContentType:"
+									+ data.getBodyContentType());
+
+		} catch (SchemaException e) {
+			e.printStackTrace();
+		}
+		final Map<String, Serializable> params = dataStoreParams;
+		this.dataStore = (DataStore) new Datastore();
 
 		if (mode != Mode.HISTORY) {
 			if (sync == Sync.ASYNC_UPDATE) {
@@ -195,44 +210,26 @@ public class MyMonitorDAO implements MonitorDAO {
 	// the SimpleFeature attributes need to be manually placed in a RequesData.
 	private void toSimpleFeature(SimpleFeature featureToUpdate, RequestData data) {
 
-		//List<String> list = data.getResources();
+		featureToUpdate.setAttribute("bodyContentType",
+				data.getBodyContentType());
 
-		//SimpleFeature feature = new SimpleFeatureBuilder(featureType)
-			//	.buildFeature("fid");
-		List<Object> list = new ArrayList<Object>();
-		
-		
-		//RequestData Atributes
-		list.add(data.getId());
-		list.add(data.getStatus());
-		list.add(data.getPath());
-		list.add(data.getQueryString());
-		list.add(data.getBody());
-		list.add(data.getHttpMethod());
-		list.add(data.getStartTime());
-		list.add(data.getEndTime());
-		list.add(data.getTotalTime());
-		list.add(data.getRemoteAddr());
-		list.add(data.getRemoteHost());
-		list.add(data.getHost());
-		list.add(data.getInternalHost());
-		list.add(data.getRemoteUser());
-		list.add(data.getService());
-		list.add(data.getOperation());
-		list.add(data.getSubOperation());
-		list.add(data.getOwsVersion());
-		list.add(data.getResources());
-		list.add(data.getResponseLength());
-		list.add(data.getResponseContentType());
-		list.add(data.getErrorMessage());
-		list.add(data.getError());
-		list.add(data.getResponseStatus());
-		list.add(data.getHttpReferer());
-		list.add(data.getBbox());
-		
-		featureToUpdate.setAttributes(list);
+		/*
+		 * featureToUpdate.setDefaultGeometry(JTS.toGeometry(data.getBbox()));
+		 * 
+		 * featureToUpdate.setAttribute("bodyContentType",
+		 * data.getBodyContentType());
+		 * featureToUpdate.setAttribute("errorMessage", data.getErrorMessage());
+		 * featureToUpdate.setAttribute("id", data.getId());
+		 * featureToUpdate.setAttribute("startTime",data.getStartTime());
+		 * featureToUpdate.setAttribute("endTime",data.getEndTime());
+		 * featureToUpdate.setAttribute("totalTime",data.getTotalTime());
+		 * featureToUpdate.setAttribute("category",data.getCategory());
+		 * featureToUpdate.setAttribute("path",data.getPath());
+		 * featureToUpdate.setAttribute
+		 * ("responseStatus",data.getResponseStatus());
+		 */
 
-		//
+		
 	}
 
 	private void toRequestData(SimpleFeature feature, RequestData dataToUpdate) {
@@ -243,22 +240,30 @@ public class MyMonitorDAO implements MonitorDAO {
 	@Override
 	public void save(RequestData data) {
 		Transaction t = new DefaultTransaction("handle");
-		try (FeatureWriter<SimpleFeatureType, SimpleFeature> fw = dataStore
-				.getFeatureWriterAppend(TYPENAME, t)) {
-			SimpleFeature newFeature = fw.next();
-			toSimpleFeature(newFeature, data);
-			fw.write();
-			t.commit();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			try {
-				t.rollback();
+		//if (dataStore != null) {
+			try (FeatureWriter<SimpleFeatureType, SimpleFeature> fw = dataStore
+					.getFeatureWriterAppend(TYPENAME, t)) {
+				SimpleFeature newFeature = fw.next();
+				toSimpleFeature(newFeature, data);
+				fw.write();
+				t.commit();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} finally {
+				try {
+					t.rollback();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
+		//}
+		try {
+			t.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}
@@ -349,5 +354,9 @@ public class MyMonitorDAO implements MonitorDAO {
 			RequestDataVisitor arg1) {
 		// TODO Auto-generated method stub
 
+	}
+
+	public SimpleFeatureType getFeatureType() {
+		return featureType;
 	}
 }
