@@ -3,6 +3,7 @@ package mil.nga.giat;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +30,9 @@ import org.geotools.data.FeatureWriter;
 import org.geotools.data.Query;
 import org.geotools.data.Transaction;
 import org.geotools.data.property.PropertyDataStoreFactory;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.wfs.WFSDataStoreFactory;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -38,6 +42,7 @@ import org.geotools.geometry.jts.JTS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.FeatureType;
+import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
 import org.opengis.geometry.Geometry;
@@ -91,6 +96,32 @@ public class MyMonitorDAO implements MonitorDAO {
 		this.dataStoreParams = dataStoreParams;
 	}
 
+	public void setDataStore(DataStore dataStore) {
+		this.dataStore = dataStore;
+	}
+	
+	private DataStore createDataStore() throws MalformedURLException{
+		File file = new File(TYPENAME+".shp");
+		file.setWritable(true);
+		Map map = new HashMap();
+		map.put( "url", file.toURL());
+
+		for( Iterator i=DataStoreFinder.getAvailableDataStores(); i.hasNext(); ){
+		    DataStoreFactorySpi factory = (DataStoreFactorySpi) i.next();
+
+		    try {
+		        if (factory.canProcess(map)) {
+		            return factory.createNewDataStore(map);
+		        }
+		    }
+		    catch( Throwable warning ){
+		        System.err.println( factory.getDisplayName() + " failed:"+warning );
+		    }
+		}
+		return null;
+	}
+	
+	
 	@Override
 	public void init(MonitorConfig config) {
 		// example...needs more
@@ -103,6 +134,13 @@ public class MyMonitorDAO implements MonitorDAO {
 			e.printStackTrace();
 		}
 
+		
+		try {
+			this.dataStore = createDataStore();
+		} catch (MalformedURLException e) {
+			System.err.println("impossivle create datastore");
+		}
+		/*
 		// HOW TO FIND OR CREATE A DATA STORE
 
 		// Experiment here to see what works best using the page I gave you.
@@ -121,6 +159,9 @@ public class MyMonitorDAO implements MonitorDAO {
 						new File(params.get(
 								PropertyDataStoreFactory.DIRECTORY.key)
 								.toString()).delete();
+					factory.createNewDataStore(params);
+					
+					
 					this.dataStore = factory.createNewDataStore(params);
 
 					if (!dataStore.getNames().contains(
@@ -134,7 +175,7 @@ public class MyMonitorDAO implements MonitorDAO {
 						+ warning);
 				warning.printStackTrace();
 			}
-		}
+		}*/
 
 	}
 
@@ -188,6 +229,7 @@ public class MyMonitorDAO implements MonitorDAO {
 			}
 
 			t.commit();
+			t.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -198,6 +240,7 @@ public class MyMonitorDAO implements MonitorDAO {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
 		}
 	}
 
@@ -229,7 +272,23 @@ public class MyMonitorDAO implements MonitorDAO {
 		 * ("responseStatus",data.getResponseStatus());
 		 */
 
-		
+		/*
+		 * SimpleFeatureBuilder builder = new SimpleFeatureBuilder(featureType);
+		 * builder.init(featureToUpdate);
+		 * 
+		 * builder.set("bodyContentType", data.getBodyContentType());
+		 * 
+		 * Geometry g = (Geometry) featureToUpdate.getAttribute("GEOMETRY");
+		 * Integer i = (Integer) featureToUpdate.getAttribute("INT"); String s =
+		 * (String) featureToUpdate.getAttribute("STRING");
+		 * 
+		 * data.getBbox(); // polygon featureToUpdate.getDefaultGeometry(); //
+		 * 
+		 * data.getBodyContentType(); // long id, String path, String start,
+		 * String end, String status
+		 * 
+		 * //
+		 */
 	}
 
 	private void toRequestData(SimpleFeature feature, RequestData dataToUpdate) {
@@ -239,9 +298,14 @@ public class MyMonitorDAO implements MonitorDAO {
 
 	@Override
 	public void save(RequestData data) {
+		
+		
+		
+		
+		
 		Transaction t = new DefaultTransaction("handle");
-		//if (dataStore != null) {
-			try (FeatureWriter<SimpleFeatureType, SimpleFeature> fw = dataStore
+		
+			try (FeatureWriter<SimpleFeatureType, SimpleFeature> fw = this.dataStore
 					.getFeatureWriterAppend(TYPENAME, t)) {
 				SimpleFeature newFeature = fw.next();
 				toSimpleFeature(newFeature, data);
@@ -258,14 +322,8 @@ public class MyMonitorDAO implements MonitorDAO {
 					e.printStackTrace();
 				}
 			}
-		//}
-		try {
-			t.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		
+			
 	}
 
 	@Override

@@ -8,7 +8,9 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.RequestData;
+import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.property.PropertyDataStoreFactory;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.jdbc.JDBCDataStoreFactory;
 import org.junit.Before;
@@ -37,15 +39,20 @@ public class MyMonitorDAOTest
         HashMap params=new HashMap();
         params.put(JDBCDataStoreFactory.NAMESPACE.key,"DefaulURI");
         params.put(JDBCDataStoreFactory.DATABASE.key,"some database path");
-       // params.put(JDBCDataStoreFactory.DBTYPE.key,"h2");
         
         
         params.put(
-                PropertyDataStoreFactory.DIRECTORY.key,dataDir.getAbsolutePath().toString());
-        params.put(
-                PropertyDataStoreFactory.NAMESPACE.key,
-                "http://dao.test.org");
+                PropertyDataStoreFactory.DIRECTORY.key,dataDir.getAbsolutePath().toString()+"/");
+        //params.put(
+          //      PropertyDataStoreFactory.NAMESPACE.key,
+            //    "http://dao.test.org");
 
+        
+        DataStoreFactorySpi dataStoreFactory = new ShapefileDataStoreFactory();
+        
+        
+        
+        
         MonitorConfig config = new MonitorConfig();
         dao.setDataStoreTypeName("MonitorRequestData");
         dao.setDataStoreParams(params);
