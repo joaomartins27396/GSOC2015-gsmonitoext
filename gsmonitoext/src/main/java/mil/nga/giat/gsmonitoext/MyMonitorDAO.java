@@ -90,10 +90,10 @@ public class MyMonitorDAO implements MonitorDAO {
 							+ " endTime:Date, totalTime:java.lang.Long, BodyAsString:String, BodyContentLength:java.lang.Long,"
 							+ "Host:String, ErrorMessage:String, HttpMethod:String, HttpReferer:String, InternalHost:String,"
 							+ "Operation:String,OwsVersion:String,QueryString:String, RemoteAddr:String, RemoteCity:String,"
-							+ "RemoteCountry:String,RemoteCountry:String, RemoteHost:String,RemoteLat:double,"
+							+ "RemoteCountry:String, RemoteHost:String,RemoteLat:double,"
 							+ " RemoteLon:double,RemoteUser:String, RemoteUserAgent:String, Resources:String,"
 							+ "ResponseContentType:String, ResponseLength:java.lang.Long, ResponseStatus:int,"
-							+ "Service:String, SubOperation:String");
+							+ "Service:String, SubOperation:String,Status:String");
 		} catch (SchemaException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -144,10 +144,10 @@ public class MyMonitorDAO implements MonitorDAO {
 							+ " endTime:Date, totalTime:java.lang.Long, BodyAsString:String, BodyContentLength:java.lang.Long,"
 							+ "Host:String, ErrorMessage:String, HttpMethod:String, HttpReferer:String, InternalHost:String,"
 							+ "Operation:String,OwsVersion:String,QueryString:String, RemoteAddr:String, RemoteCity:String,"
-							+ "RemoteCountry:String,RemoteCountry:String, RemoteHost:String,RemoteLat:double,"
+							+ "RemoteCountry:String, RemoteHost:String,RemoteLat:double,"
 							+ " RemoteLon:double,RemoteUser:String, RemoteUserAgent:String, Resources:String,"
 							+ "ResponseContentType:String, ResponseLength:java.lang.Long, ResponseStatus:int,"
-							+ "Service:String, SubOperation:String");
+							+ "Service:String, SubOperation:String, Status:String");
 		} catch (SchemaException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -220,6 +220,8 @@ public class MyMonitorDAO implements MonitorDAO {
 
 	protected void toSimpleFeature(SimpleFeature featureToUpdate,
 			RequestData data) {
+		
+		
 
 		// "envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date, endTime:Date, totalTime:java.lang.Long");
 
@@ -347,12 +349,12 @@ public class MyMonitorDAO implements MonitorDAO {
 		
 
 		//data.getResources();			//data.setResources(resources);   tratar lista
-		if(data.getResources()!=null){
+		if(data.getResources()!=null&&!data.getResources().isEmpty()){
 			String resources="";
 			for(String s:data.getResources()){
 				resources+=s+",";
 			}
-			resources.substring(0, resources.length()-1);
+			resources.substring(0, resources.length()-2);
 			
 			featureToUpdate.setAttribute("Resources", resources);
 		}
@@ -398,8 +400,7 @@ public class MyMonitorDAO implements MonitorDAO {
 	}
 
 	protected void toRequestData(SimpleFeature feature, RequestData dataToUpdate) {
-
-		// the converstion to bbox I don't know exactly how to do that
+		
 
 		Polygon pol = (Polygon) feature.getAttribute("Polygon");
 

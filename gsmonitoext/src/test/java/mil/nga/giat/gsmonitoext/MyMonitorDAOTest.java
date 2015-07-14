@@ -68,7 +68,9 @@ public class MyMonitorDAOTest
 	@Test
 	public void test()
 			throws IOException {
-
-		dao.add(new RequestData());
+		RequestData rd = new RequestData();
+		rd.setId(0);
+		dao.add(rd);
+		dao.getRequest(0);
 	}
 }
