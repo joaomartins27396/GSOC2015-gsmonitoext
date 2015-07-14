@@ -1,11 +1,14 @@
 package mil.nga.giat.gsmonitoext;
 
+
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -237,54 +240,161 @@ public class MyMonitorDAO implements MonitorDAO {
 			featureToUpdate.setAttribute("totalTime", data.getTotalTime());
 		
 		
-		/*
-		data.getBodyAsString();			//data.setBody(body); ??
-		data.getBodyContentLength(); 	//data.setBodyContentLength(bodyContentLength);
-		data.getHost();					//data.setHost(host);
-		data.getErrorMessage();			//data.setErrorMessage(errorMessage);
-		data.getHttpMethod();			//data.setHttpMethod(httpMethod);
-		data.getHttpReferer();			//data.setHttpReferer(httpReferer);
+		
+		//data.getBodyAsString();			//data.setBody(body); ??
+		if(data.getBodyAsString()!=null){
+			featureToUpdate.setAttribute("BodyAsString", data.getBodyAsString());
+		}
+		
+		//data.getBodyContentLength(); 	//data.setBodyContentLength(bodyContentLength);
+		if(data.getBodyContentLength()>0){
+			featureToUpdate.setAttribute("BodyContentLength", data.getBodyContentLength());
+		}
+		
+		
+		//data.getHost();					//data.setHost(host);	
+		if(data.getHost()!=null){
+			featureToUpdate.setAttribute("Host", data.getHost());
+		}
+		
+		//data.getErrorMessage();			//data.setErrorMessage(errorMessage);
+		if(data.getErrorMessage()!=null){
+			featureToUpdate.setAttribute("ErrorMessage", data.getErrorMessage());
+		}
+		
+		//data.getHttpMethod();			//data.setHttpMethod(httpMethod);
+		if(data.getHttpMethod()!=null){
+			featureToUpdate.setAttribute("HttpMethod", data.getHttpMethod());
+		}
+		
+		//data.getHttpReferer();			//data.setHttpReferer(httpReferer);
+		if(data.getHttpReferer()!=null){
+			featureToUpdate.setAttribute("HttpReferer", data.getHttpReferer());
+		}
+		
+		
+		
 		data.getInternalHost();			//data.setInternalHost(internalHost);
-		data.getOperation();			//data.setOperation(operation);
-		data.getOwsVersion();			//data.setOwsVersion(owsVersion);
-		data.getQueryString();			//data.setQueryString(queryString);
-		data.getRemoteAddr();			//data.setRemoteAddr(remoteAddr);
-		data.getRemoteCity();			//data.setRemoteCity(remoteCity);
-		data.getRemoteCountry();		//data.setRemoteCountry(remoteCountry);
-		data.getRemoteHost();			//data.setRemoteHost(remoteHost);
-		data.getRemoteLat();			//data.setRemoteLat(remoteLat);
-		data.getRemoteLon();			//data.setRemoteLon(remoteLon);
-		data.getRemoteUser();			//data.setRemoteUser(remoteUser);
-		data.getRemoteUserAgent();		//data.setRemoteUserAgent(remoteUserAgent);
-		data.getResources();			//data.setResources(resources);   tratar lista
-		data.getResponseContentType();	//data.setResponseContentType(responseContentType);
-		data.getResponseLength();		//data.setResponseLength(responseLength);
-		data.getResponseStatus();		//data.setResponseStatus(httpStatus);
-		data.getService();				//data.setService(service);
-		data.getSubOperation();			//data.setSubOperation(subOperation);
-		
-*/
-		//data.getStatus();		??		//data.setStatus(status);
+		if(data.getInternalHost()!=null){
+			featureToUpdate.setAttribute("InternalHost", data.getInternalHost());
+		}
 		
 		
-		try {
-			featureType = DataUtilities
-					.createType(
-							dataStoreTypeName,
-							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date,"
-							+ " endTime:Date, totalTime:java.lang.Long, BodyAsString:String, BodyContentLength:java.lang.Long,"
-							+ "Host:String, ErrorMessage:String, HttpMethod:String, HttpReferer:String, InternalHost:String,"
-							+ "Operation:String,OwsVersion:String,QueryString:String, RemoteAddr:String, RemoteCity:String,"
-							+ "RemoteCountry:String,RemoteCountry:String, RemoteHost:String,RemoteLat:double,"
-							+ " RemoteLon:double,RemoteUser:String, RemoteUserAgent:String, Resources:String,"
-							+ "ResponseContentType:String, ResponseLength:java.lang.Long, ResponseStatus:int,"
-							+ "Service:String, SubOperation:String");
-		} catch (SchemaException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		//data.getOperation();			//data.setOperation(operation);
+		if(data.getOperation()!=null){
+			featureToUpdate.setAttribute("Operation", data.getOperation());
+		}
+		
+		//data.getOwsVersion();			//data.setOwsVersion(owsVersion);
+		if(data.getOwsVersion()!=null){
+			featureToUpdate.setAttribute("OwsVersion", data.getOwsVersion());
+		}
+		
+		//data.getQueryString();			//data.setQueryString(queryString);
+		if(data.getQueryString()!=null){
+			featureToUpdate.setAttribute("QueryString", data.getQueryString());
 		}
 
+		//data.getRemoteAddr();			//data.setRemoteAddr(remoteAddr);
+		if(data.getRemoteAddr()!=null){
+			featureToUpdate.setAttribute("RemoteAddr", data.getRemoteAddr());
+		}
 		
+		
+		//data.getRemoteCity();			//data.setRemoteCity(remoteCity);
+		if(data.getRemoteCity()!=null){
+			featureToUpdate.setAttribute("RemoteCity", data.getRemoteCity());
+		}
+		
+		
+		//data.getRemoteCountry();		//data.setRemoteCountry(remoteCountry);
+		if(data.getRemoteCountry()!=null){
+			featureToUpdate.setAttribute("RemoteCountry", data.getRemoteCountry());
+		}
+		
+		
+		//data.getRemoteHost();			//data.setRemoteHost(remoteHost);
+		if(data.getRemoteHost()!=null){
+			featureToUpdate.setAttribute("RemoteHost", data.getRemoteHost());
+		}
+		
+		
+		//data.getRemoteLat();			//data.setRemoteLat(remoteLat);
+		if(data.getRemoteLat()>0){
+			featureToUpdate.setAttribute("RemoteLat", data.getRemoteLat());
+		}
+		
+		
+		
+		
+		//data.getRemoteLon();			//data.setRemoteLon(remoteLon);
+		if(data.getRemoteLon()>0){
+			featureToUpdate.setAttribute("RemoteLon", data.getRemoteLon());
+		}
+		
+		
+		//data.getRemoteUser();			//data.setRemoteUser(remoteUser);
+		if(data.getRemoteUser()!=null){
+			featureToUpdate.setAttribute("RemoteUser", data.getRemoteUser());
+		}
+		
+		
+		//data.getRemoteUserAgent();		//data.setRemoteUserAgent(remoteUserAgent);
+		if(data.getRemoteUserAgent()!=null){
+			featureToUpdate.setAttribute("RemoteUserAgent", data.getRemoteUserAgent());
+		}
+		
+		
+
+		//data.getResources();			//data.setResources(resources);   tratar lista
+		if(data.getResources()!=null){
+			String resources="";
+			for(String s:data.getResources()){
+				resources+=s+",";
+			}
+			resources.substring(0, resources.length()-1);
+			
+			featureToUpdate.setAttribute("Resources", resources);
+		}
+		
+		//data.getResponseContentType();	//data.setResponseContentType(responseContentType);
+		if(data.getResponseContentType()!=null){
+			featureToUpdate.setAttribute("ResponseContentType", data.getResponseContentType());
+		}
+		
+		
+		//data.getResponseLength();		//data.setResponseLength(responseLength);
+		if(data.getResponseLength()>0){
+			featureToUpdate.setAttribute("ResponseLength", data.getResponseLength());
+		}
+		
+		//data.getResponseStatus();		//data.setResponseStatus(httpStatus);
+		if(data.getResponseStatus()!=null){
+			featureToUpdate.setAttribute("ResponseStatus", data.getResponseStatus());
+		}
+		
+		
+		//data.getService();				//data.setService(service);
+		if(data.getService()!=null){
+			featureToUpdate.setAttribute("Service", data.getService());
+		}
+		
+		
+		//data.getSubOperation();			//data.setSubOperation(subOperation);
+		if(data.getSubOperation()!=null){
+			featureToUpdate.setAttribute("SubOperation", data.getSubOperation());
+		}
+		
+		
+		//data.getStatus();
+		if(data.getStatus()!=null){
+			featureToUpdate.setAttribute("Status", data.getStatus().name());
+			
+			
+		}
+		//Status.valueOf(data.getStatus().name());
+		//data.getStatus();		??		//data.setStatus(status);
+			
 	}
 
 	protected void toRequestData(SimpleFeature feature, RequestData dataToUpdate) {
@@ -303,7 +413,80 @@ public class MyMonitorDAO implements MonitorDAO {
 		dataToUpdate.setPath((String) feature.getAttribute("path"));
 		dataToUpdate.setStartTime((Date) feature.getAttribute("startTime"));
 		dataToUpdate.setEndTime((Date) feature.getAttribute("endTime"));
-		//dataToUpdate.setTotalTime((long) feature.getAttribute("totalTime"));
+		dataToUpdate.setTotalTime((long) feature.getAttribute("totalTime"));
+		
+		 
+		
+		
+		dataToUpdate.setBody(((String) feature.getAttribute("BodyAsString")).getBytes());
+		
+		
+		dataToUpdate.setBodyContentLength((long) feature.getAttribute("BodyContentLength"));
+		
+		dataToUpdate.setHost((String) feature.getAttribute("Host"));
+				
+		dataToUpdate.setErrorMessage((String) feature.getAttribute("ErrorMessage"));
+		
+		dataToUpdate.setErrorMessage((String) feature.getAttribute("ErrorMessage"));
+	
+		dataToUpdate.setHttpMethod((String) feature.getAttribute("HttpMethod"));
+				
+		dataToUpdate.setHttpReferer((String) feature.getAttribute("HttpReferer"));
+				
+		dataToUpdate.setInternalHost((String) feature.getAttribute("InternalHost"));
+
+		dataToUpdate.setOperation((String) feature.getAttribute("Operation"));
+				
+		dataToUpdate.setOwsVersion((String) feature.getAttribute("OwsVersion"));
+				
+		dataToUpdate.setQueryString((String) feature.getAttribute("QueryString"));
+				
+		dataToUpdate.setRemoteAddr((String) feature.getAttribute("RemoteAddr"));
+
+		dataToUpdate.setRemoteCity((String) feature.getAttribute("RemoteCity"));
+
+		dataToUpdate.setRemoteCountry((String) feature.getAttribute("RemoteCountry"));
+		
+		dataToUpdate.setRemoteHost((String) feature.getAttribute("RemoteHost"));
+		
+		dataToUpdate.setRemoteLat( (double) feature.getAttribute("RemoteLat"));
+		
+		dataToUpdate.setRemoteLon((double) feature.getAttribute("RemoteLon"));
+		
+		dataToUpdate.setRemoteUser((String) feature.getAttribute("RemoteUser"));
+		
+		dataToUpdate.setRemoteUserAgent((String) feature.getAttribute("RemoteUserAgent"));
+		
+		
+		
+		String str = (String) feature.getAttribute("Resources");
+		
+		
+		if(str!=null){
+			List <String> list = new LinkedList<String>();
+			for(String s: str.split(",")){
+				list.add(s);
+			}
+			dataToUpdate.setResources(list);
+			
+		}
+		
+		dataToUpdate.setResponseContentType((String) feature.getAttribute("ResponseContentType"));
+		
+		dataToUpdate.setResponseLength((long) feature.getAttribute("ResponseLength"));
+		
+		dataToUpdate.setResponseStatus( (Integer) feature.getAttribute("ResponseStatus"));
+		
+		dataToUpdate.setService((String) feature.getAttribute("Service"));
+		
+		dataToUpdate.setSubOperation((String) feature.getAttribute("SubOperation"));
+
+		org.geoserver.monitor.RequestData.Status status = org.geoserver.monitor.RequestData.Status.valueOf((String)feature.getAttribute("Status"));
+		dataToUpdate.setStatus(status);
+				
+
+		
+		
 
 		//
 	}

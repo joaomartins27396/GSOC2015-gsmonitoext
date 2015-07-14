@@ -1,7 +1,7 @@
-07-14 12:56:29 jdbc[2]: SQLException
+07-14 21:27:22 jdbc[2]: SQLException
 org.h2.jdbc.JdbcSQLException: Table _GEODB not found; SQL statement:
 SELECT checksum FROM _GEODB [42102-119]
-07-14 12:56:29 jdbc[2]: SQLException
+07-14 21:27:22 jdbc[2]: SQLException
 org.h2.jdbc.JdbcSQLException: Duplicate column name RemoteCountry; SQL statement:
 CREATE TABLE "MonitorRequestData" ( "fid" int AUTO_INCREMENT(1) PRIMARY KEY, "envelope" BLOB COMMENT 'POLYGON', "id" BIGINT, "queryString" VARCHAR(255), "path" VARCHAR(255), "startTime" TIMESTAMP, " endTime" TIMESTAMP, " totalTime" BIGINT, " BodyAsString" VARCHAR(255), " BodyContentLength" BIGINT, "Host" VARCHAR(255), " ErrorMessage" VARCHAR(255), " HttpMethod" VARCHAR(255), " HttpReferer" VARCHAR(255), " InternalHost" VARCHAR(255), "Operation" VARCHAR(255), "OwsVersion" VARCHAR(255), "QueryString" VARCHAR(255), " RemoteAddr" VARCHAR(255), " RemoteCity" VARCHAR(255), "RemoteCountry" VARCHAR(255), "RemoteCountry" VARCHAR(255), " RemoteHost" VARCHAR(255), "RemoteLat" DOUBLE, " RemoteLon" DOUBLE, "RemoteUser" VARCHAR(255), " RemoteUserAgent" VARCHAR(255), " Resources" VARCHAR(255), "ResponseContentType" VARCHAR(255), " ResponseLength" BIGINT, " ResponseStatus" INTEGER, "Service" VARCHAR(255), " SubOperation" VARCHAR(255) )  [42121-119]
 	at org.h2.message.Message.getSQLException(Message.java:106)
@@ -18,8 +18,8 @@ CREATE TABLE "MonitorRequestData" ( "fid" int AUTO_INCREMENT(1) PRIMARY KEY, "en
 	at org.apache.commons.dbcp.DelegatingStatement.execute(DelegatingStatement.java:264)
 	at org.geotools.jdbc.JDBCDataStore.createSchema(JDBCDataStore.java:749)
 	at org.geotools.jdbc.JDBCDataStore.createSchema(JDBCDataStore.java:144)
-	at mil.nga.giat.gsmonitoext.MyMonitorDAO.init(MyMonitorDAO.java:118)
-	at mil.nga.giat.gsmonitoext.MyMonitorDAOTest.setup(MyMonitorDAOTest.java:46)
+	at mil.nga.giat.gsmonitoext.MyMonitorDAO.init(MyMonitorDAO.java:121)
+	at mil.nga.giat.gsmonitoext.MyMonitorDAOTest.setup(MyMonitorDAOTest.java:44)
 	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
 	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)

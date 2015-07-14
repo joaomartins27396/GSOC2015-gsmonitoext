@@ -10,8 +10,6 @@ import java.util.Map;
 
 
 
-import mil.nga.giat.gsmonitoext.*;
-
 import org.apache.commons.io.FileUtils;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.RequestData;
