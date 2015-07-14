@@ -1,4 +1,4 @@
-package mil.nga.gsmonitoext;
+package mil.nga.giat.gsmonitoext;
 
 
 
@@ -10,8 +10,7 @@ import java.util.Map;
 
 
 
-
-import mil.nga.giat.gsmonitoext.MyMonitorDAO;
+import mil.nga.giat.gsmonitoext.*;
 
 import org.apache.commons.io.FileUtils;
 import org.geoserver.monitor.MonitorConfig;
@@ -33,7 +32,7 @@ public class MyMonitorDAOTest
 	@Before
 	public void setup()
 			throws IOException {
-
+		
 		File dataDir = new File(
 				"testdata");
 		if (dataDir.exists()) FileUtils.deleteDirectory(dataDir);

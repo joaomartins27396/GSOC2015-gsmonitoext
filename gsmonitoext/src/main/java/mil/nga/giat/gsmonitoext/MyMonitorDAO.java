@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.SSLEngineResult.Status;
+
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.MonitorDAO;
 import org.geoserver.monitor.RequestData;
@@ -81,7 +83,14 @@ public class MyMonitorDAO implements MonitorDAO {
 			featureType = DataUtilities
 					.createType(
 							dataStoreTypeName,
-							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date, endTime:Date, totalTime:java.lang.Long");
+							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date,"
+							+ " endTime:Date, totalTime:java.lang.Long, BodyAsString:String, BodyContentLength:java.lang.Long,"
+							+ "Host:String, ErrorMessage:String, HttpMethod:String, HttpReferer:String, InternalHost:String,"
+							+ "Operation:String,OwsVersion:String,QueryString:String, RemoteAddr:String, RemoteCity:String,"
+							+ "RemoteCountry:String,RemoteCountry:String, RemoteHost:String,RemoteLat:double,"
+							+ " RemoteLon:double,RemoteUser:String, RemoteUserAgent:String, Resources:String,"
+							+ "ResponseContentType:String, ResponseLength:java.lang.Long, ResponseStatus:int,"
+							+ "Service:String, SubOperation:String");
 		} catch (SchemaException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -128,7 +137,14 @@ public class MyMonitorDAO implements MonitorDAO {
 			featureType = DataUtilities
 					.createType(
 							dataStoreTypeName,
-							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date, endTime:Date, totalTime:java.lang.Long");
+							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date,"
+							+ " endTime:Date, totalTime:java.lang.Long, BodyAsString:String, BodyContentLength:java.lang.Long,"
+							+ "Host:String, ErrorMessage:String, HttpMethod:String, HttpReferer:String, InternalHost:String,"
+							+ "Operation:String,OwsVersion:String,QueryString:String, RemoteAddr:String, RemoteCity:String,"
+							+ "RemoteCountry:String,RemoteCountry:String, RemoteHost:String,RemoteLat:double,"
+							+ " RemoteLon:double,RemoteUser:String, RemoteUserAgent:String, Resources:String,"
+							+ "ResponseContentType:String, ResponseLength:java.lang.Long, ResponseStatus:int,"
+							+ "Service:String, SubOperation:String");
 		} catch (SchemaException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -215,9 +231,60 @@ public class MyMonitorDAO implements MonitorDAO {
 			featureToUpdate.setAttribute("startTime", data.getStartTime());
 		if (data.getEndTime() != null)
 			featureToUpdate.setAttribute("endTime", data.getEndTime());
-		featureToUpdate.setAttribute("totalTime", data.getTotalTime());
+		
+		
+		if(data.getTotalTime()>0)
+			featureToUpdate.setAttribute("totalTime", data.getTotalTime());
+		
+		
+		/*
+		data.getBodyAsString();			//data.setBody(body); ??
+		data.getBodyContentLength(); 	//data.setBodyContentLength(bodyContentLength);
+		data.getHost();					//data.setHost(host);
+		data.getErrorMessage();			//data.setErrorMessage(errorMessage);
+		data.getHttpMethod();			//data.setHttpMethod(httpMethod);
+		data.getHttpReferer();			//data.setHttpReferer(httpReferer);
+		data.getInternalHost();			//data.setInternalHost(internalHost);
+		data.getOperation();			//data.setOperation(operation);
+		data.getOwsVersion();			//data.setOwsVersion(owsVersion);
+		data.getQueryString();			//data.setQueryString(queryString);
+		data.getRemoteAddr();			//data.setRemoteAddr(remoteAddr);
+		data.getRemoteCity();			//data.setRemoteCity(remoteCity);
+		data.getRemoteCountry();		//data.setRemoteCountry(remoteCountry);
+		data.getRemoteHost();			//data.setRemoteHost(remoteHost);
+		data.getRemoteLat();			//data.setRemoteLat(remoteLat);
+		data.getRemoteLon();			//data.setRemoteLon(remoteLon);
+		data.getRemoteUser();			//data.setRemoteUser(remoteUser);
+		data.getRemoteUserAgent();		//data.setRemoteUserAgent(remoteUserAgent);
+		data.getResources();			//data.setResources(resources);   tratar lista
+		data.getResponseContentType();	//data.setResponseContentType(responseContentType);
+		data.getResponseLength();		//data.setResponseLength(responseLength);
+		data.getResponseStatus();		//data.setResponseStatus(httpStatus);
+		data.getService();				//data.setService(service);
+		data.getSubOperation();			//data.setSubOperation(subOperation);
+		
+*/
+		//data.getStatus();		??		//data.setStatus(status);
+		
+		
+		try {
+			featureType = DataUtilities
+					.createType(
+							dataStoreTypeName,
+							"envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date,"
+							+ " endTime:Date, totalTime:java.lang.Long, BodyAsString:String, BodyContentLength:java.lang.Long,"
+							+ "Host:String, ErrorMessage:String, HttpMethod:String, HttpReferer:String, InternalHost:String,"
+							+ "Operation:String,OwsVersion:String,QueryString:String, RemoteAddr:String, RemoteCity:String,"
+							+ "RemoteCountry:String,RemoteCountry:String, RemoteHost:String,RemoteLat:double,"
+							+ " RemoteLon:double,RemoteUser:String, RemoteUserAgent:String, Resources:String,"
+							+ "ResponseContentType:String, ResponseLength:java.lang.Long, ResponseStatus:int,"
+							+ "Service:String, SubOperation:String");
+		} catch (SchemaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-		//
+		
 	}
 
 	protected void toRequestData(SimpleFeature feature, RequestData dataToUpdate) {
@@ -236,7 +303,7 @@ public class MyMonitorDAO implements MonitorDAO {
 		dataToUpdate.setPath((String) feature.getAttribute("path"));
 		dataToUpdate.setStartTime((Date) feature.getAttribute("startTime"));
 		dataToUpdate.setEndTime((Date) feature.getAttribute("endTime"));
-		dataToUpdate.setTotalTime((long) feature.getAttribute("totalTime"));
+		//dataToUpdate.setTotalTime((long) feature.getAttribute("totalTime"));
 
 		//
 	}
