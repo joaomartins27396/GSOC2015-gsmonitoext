@@ -10,8 +10,10 @@ import java.util.Map;
 
 
 
+
 import org.apache.commons.io.FileUtils;
 import org.geoserver.monitor.MonitorConfig;
+import org.geoserver.monitor.Query;
 import org.geoserver.monitor.RequestData;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,9 +70,8 @@ public class MyMonitorDAOTest
 	@Test
 	public void test()
 			throws IOException {
-		RequestData rd = new RequestData();
-		rd.setId(0);
-		dao.add(rd);
-		dao.getRequest(0);
+
+		dao.add(new RequestData());
+		dao.getRequests(new Query());
 	}
 }
