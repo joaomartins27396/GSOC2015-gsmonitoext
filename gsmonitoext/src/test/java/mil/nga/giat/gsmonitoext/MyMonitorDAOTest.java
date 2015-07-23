@@ -103,10 +103,6 @@ public class MyMonitorDAOTest
 	        
 	    }
 	    
-	    @Test
-	    public void testGetRequestsFilterIN2() throws Exception {
-	        List<RequestData> datas = dao.getRequests( new Query().filter(
-	            "status", Arrays.asList(Status.RUNNING, Status.WAITING), Comparison.IN ));
-	    }
+	    
 	    
 }

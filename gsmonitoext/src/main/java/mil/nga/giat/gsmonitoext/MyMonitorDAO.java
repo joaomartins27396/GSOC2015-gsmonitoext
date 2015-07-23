@@ -14,10 +14,15 @@ import java.util.Map;
 
 
 
+
+
+
+
 import org.geoserver.monitor.And;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.MonitorDAO;
 import org.geoserver.monitor.Or;
+import org.geoserver.monitor.Query.Comparison;
 import org.geoserver.monitor.RequestData;
 import org.geoserver.monitor.RequestDataVisitor;
 import org.geotools.data.DataStore;
@@ -29,6 +34,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.data.FeatureWriter;
 import org.geotools.data.Query;
 import org.geotools.data.Transaction;
+import org.geotools.feature.NameImpl;
 import org.geotools.feature.SchemaException;
 import org.geotools.filter.FilterFactoryImpl;
 import org.geotools.filter.text.cql2.CQL;
@@ -37,6 +43,7 @@ import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.opengis.filter.FilterVisitor;
 import org.opengis.filter.expression.Expression;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.geometry.Geometry;
@@ -592,21 +599,15 @@ public class MyMonitorDAO implements MonitorDAO {
 			
 			return factory.and(newChildren);
 		}
-		else{ 
-			
-			List filters = new LinkedList<Filter>();
-			Filter fil = factory.or(filters);
-			Or orFilter = (Or) filter;
-			
-			for (org.geoserver.monitor.Filter child : orFilter.getFilters()) {
-				filters.add(convertFilter(factory,  child));
-			}
+		else if(filter!=null && filter.getType().compareTo(Comparison.IN)>=0){
+			return factory.greaterOrEqual(factory.property(new NameImpl(filter.getLeft().toString())), factory.literal(filter.getRight()));
+		} else { 
 			
 			
-			return factory.or(filters);
+			//case of null filter
+			Query q = new Query();
+			return q.getFilter();
 		}
-		
-		
 		
 	}
 
