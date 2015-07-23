@@ -4,8 +4,14 @@ package mil.nga.giat.gsmonitoext;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+
+
+
 
 
 
@@ -14,7 +20,9 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.Query;
+import org.geoserver.monitor.Query.Comparison;
 import org.geoserver.monitor.RequestData;
+import org.geoserver.monitor.RequestData.Status;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,6 +80,33 @@ public class MyMonitorDAOTest
 			throws IOException {
 
 		dao.add(new RequestData());
-		dao.getRequests(new Query());
 	}
+
+
+	
+	  
+	    
+	   
+	 
+	    @Test
+	    public void testGetRequestsPaged() throws Exception {
+	        List<RequestData> datas = dao.getRequests(new Query().page(0l, 99l));
+	        
+	        
+	    }
+	    
+	    
+	    @Test
+	    public void testGetRequestsFilterIN() throws Exception {
+	        List<RequestData> datas = dao.getRequests(
+	            new Query().filter("path", Arrays.asList("/two", "/seven"), Comparison.IN ));
+	        
+	    }
+	    
+	    @Test
+	    public void testGetRequestsFilterIN2() throws Exception {
+	        List<RequestData> datas = dao.getRequests( new Query().filter(
+	            "status", Arrays.asList(Status.RUNNING, Status.WAITING), Comparison.IN ));
+	    }
+	    
 }

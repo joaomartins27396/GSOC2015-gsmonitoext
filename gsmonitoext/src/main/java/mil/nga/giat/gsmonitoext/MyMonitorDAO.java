@@ -1,6 +1,6 @@
 package mil.nga.giat.gsmonitoext;
 
-import java.io.File;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,10 +10,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.SSLEngineResult.Status;
 
+
+
+
+import org.geoserver.monitor.And;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.MonitorDAO;
+import org.geoserver.monitor.Or;
 import org.geoserver.monitor.RequestData;
 import org.geoserver.monitor.RequestDataVisitor;
 import org.geotools.data.DataStore;
@@ -27,17 +31,15 @@ import org.geotools.data.Query;
 import org.geotools.data.Transaction;
 import org.geotools.feature.SchemaException;
 import org.geotools.filter.FilterFactoryImpl;
+import org.geotools.filter.text.cql2.CQL;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
-import org.opengis.filter.spatial.BBOX;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.geometry.Geometry;
-import org.opengis.geometry.coordinate.Polygon;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
 
@@ -575,23 +577,57 @@ public class MyMonitorDAO implements MonitorDAO {
 	@Override
 	public void dispose() {
 	}
+	
+	
+	public org.opengis.filter.Filter convertFilter(FilterFactoryImpl factory, org.geoserver.monitor.Filter filter) {
+
+		
+		if (filter instanceof And) {
+			
+			And andFilter = (And)filter;
+			List<org.opengis.filter.Filter> newChildren = new ArrayList<org.opengis.filter.Filter>();
+			for (org.geoserver.monitor.Filter child : andFilter.getFilters()) {
+				newChildren.add(convertFilter(factory,  child));
+			}
+			
+			return factory.and(newChildren);
+		}
+		else{ 
+			
+			List filters = new LinkedList<Filter>();
+			Filter fil = factory.or(filters);
+			Or orFilter = (Or) filter;
+			
+			for (org.geoserver.monitor.Filter child : orFilter.getFilters()) {
+				filters.add(convertFilter(factory,  child));
+			}
+			
+			
+			return factory.or(filters);
+		}
+		
+		
+		
+	}
+
 
 	@Override
 	public List<RequestData> getRequests(org.geoserver.monitor.Query query) {
-		
-		
+
 		List<RequestData> list = new LinkedList<RequestData>();
-		
+
 		Transaction t = new DefaultTransaction("handle");
 
 		FilterFactoryImpl factory = new FilterFactoryImpl();
 		Expression exp1 = factory.property("Query");
 		Expression exp2 = factory.literal(query);
 		Filter equals = factory.equal(exp1, exp2, false);
-
 		
+		Filter filt = convertFilter(factory, query.getFilter());
+		
+	
 		try (FeatureReader<SimpleFeatureType, SimpleFeature> fw = dataStore
-				.getFeatureReader(new Query(dataStoreTypeName, equals), t)) {
+				.getFeatureReader(new Query(dataStoreTypeName, filt), t)) {
 
 			if (fw.hasNext()) {
 				RequestData data = new RequestData();
