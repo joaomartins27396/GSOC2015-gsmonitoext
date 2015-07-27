@@ -1,22 +1,18 @@
 package mil.nga.giat.gsmonitoext;
 
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-
-
-
-
-
-
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.geoserver.monitor.And;
 import org.geoserver.monitor.MonitorConfig;
@@ -25,6 +21,7 @@ import org.geoserver.monitor.Or;
 import org.geoserver.monitor.Query.Comparison;
 import org.geoserver.monitor.RequestData;
 import org.geoserver.monitor.RequestDataVisitor;
+import org.geoserver.ows.util.OwsUtils;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataStoreFinder;
@@ -37,36 +34,53 @@ import org.geotools.data.Transaction;
 import org.geotools.feature.NameImpl;
 import org.geotools.feature.SchemaException;
 import org.geotools.filter.FilterFactoryImpl;
-import org.geotools.filter.text.cql2.CQL;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
+import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
-import org.opengis.filter.FilterVisitor;
 import org.opengis.filter.expression.Expression;
-import org.opengis.geometry.BoundingBox;
-import org.opengis.geometry.Geometry;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Envelope;
 
 public class MyMonitorDAO implements MonitorDAO {
 
+	private final static Logger LOGGER = Logging.getLogger(MyMonitorDAO.class);
+
 	public static final String TYPENAME = "requestDataFeature";
 	private DataStore dataStore = null;
+	private MonitorConfig config;
+
+	public static CoordinateReferenceSystem CRSI;
+
+	static {
+		try {
+			CRSI = CRS.decode("EPSG:4326");
+		} catch (FactoryException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private SimpleFeatureType featureType = null;
 
 	String dataStoreTypeName = TYPENAME;
 
 	// need a way to set/get this via Spring setter/getter
-	private Map<String, Serializable> dataStoreParams;
-
-	// myData.createSchema( featureType );
+	private Map<String, Serializable> dataStoreParams = new HashMap<String, Serializable>();
 
 	@Override
 	public String getName() {
 		return "SimpleFeature Monitor";
+	}
+
+	public SimpleFeatureType getFeatureType() {
+		return featureType;
 	}
 
 	public String getDataStoreTypeName() {
@@ -85,57 +99,68 @@ public class MyMonitorDAO implements MonitorDAO {
 		this.dataStoreParams = dataStoreParams;
 	}
 
+	private synchronized void initType() {
+		if (featureType == null) {
+			try {
+				featureType = DataUtilities
+						.createType(
+								dataStoreTypeName,
+								"envelope:com.vividsolutions.jts.geom.Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date,"
+										+ "endTime:Date,totalTime:java.lang.Long,BodyAsString:String,BodyContentLength:java.lang.Long,"
+										+ "Host:String,ErrorMessage:String,HttpMethod:String,HttpReferer:String,InternalHost:String,"
+										+ "Operation:String,OwsVersion:String,QueryString:String,RemoteAddr:String,RemoteCity:String,"
+										+ "RemoteCountry:String,RemoteHost:String,RemoteLat:double,"
+										+ "RemoteLon:double,RemoteUser:String,RemoteUserAgent:String,Resources:String,"
+										+ "ResponseContentType:String,ResponseLength:java.lang.Long,ResponseStatus:int,"
+										+ "Service:String,SubOperation:String,Status:String,Category:String");
+			} catch (SchemaException e) {
+				LOGGER.log(Level.SEVERE, "Failed to initialized feature type",
+						e);
+			}
+		}
+	}
+
+	private synchronized void initStore() {
+		if (dataStore == null) {
+			final Map<String, Serializable> params = dataStoreParams;
+
+			for (Iterator<?> i = DataStoreFinder.getAvailableDataStores(); i
+					.hasNext();) {
+				DataStoreFactorySpi factory = (DataStoreFactorySpi) i.next();
+
+				try {
+					if (factory.canProcess(params)) {
+
+						this.dataStore = factory.createDataStore(params);
+
+						if (!dataStore.getNames().contains(
+								this.featureType.getName())) {
+							dataStore.createSchema(this.featureType);
+						}
+					}
+
+				} catch (Throwable warning) {
+					LOGGER.warning(factory.getDisplayName() + " failed:"
+							+ warning);
+					warning.printStackTrace();
+
+				}
+			}
+		}
+	}
+
 	@Override
 	public void init(MonitorConfig config) {
 
-		// example...needs more
-		try {
-			featureType = DataUtilities
-					.createType(
-							dataStoreTypeName,
-							"envelope:com.vividsolutions.jts.geom.Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date,"
-									+ " endTime:Date, totalTime:java.lang.Long, BodyAsString:String, BodyContentLength:java.lang.Long,"
-									+ "Host:String, ErrorMessage:String, HttpMethod:String, HttpReferer:String, InternalHost:String,"
-									+ "Operation:String,OwsVersion:String,QueryString:String, RemoteAddr:String, RemoteCity:String,"
-									+ "RemoteCountry:String, RemoteHost:String,RemoteLat:double,"
-									+ " RemoteLon:double,RemoteUser:String, RemoteUserAgent:String, Resources:String,"
-									+ "ResponseContentType:String, ResponseLength:java.lang.Long, ResponseStatus:int,"
-									+ "Service:String, SubOperation:String,Status:String");
-		} catch (SchemaException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		this.config = config;
+		Enumeration<Object> key = config.getProperties().keys();
+		while (key.hasMoreElements()) {
+			Object keyValue = key.nextElement();
+			this.dataStoreParams.put(keyValue.toString(), config
+					.getProperties().getProperty(keyValue.toString()));
 		}
-
-		// HOW TO FIND OR CREATE A DATA STORE
-
-		// Experiment here to see what works best using the page I gave you.
-		// For testing, somehow parameterize this to use a shape file store.
-		// The latest version of documentation suggests using a Catalog.
-
-		final Map<String, Serializable> params = dataStoreParams;
-
-		for (Iterator<?> i = DataStoreFinder.getAvailableDataStores(); i
-				.hasNext();) {
-			DataStoreFactorySpi factory = (DataStoreFactorySpi) i.next();
-
-			try {
-				if (factory.canProcess(params)) {
-
-					this.dataStore = factory.createDataStore(params);
-
-					if (!dataStore.getNames().contains(
-							this.featureType.getName())) {
-						dataStore.createSchema(this.featureType);
-					}
-				}
-
-			} catch (Throwable warning) {
-				System.out.println(factory.getDisplayName() + " failed:"
-						+ warning);
-				warning.printStackTrace();
-
-			}
-		}
+		this.initType();
+		this.initStore();
 
 	}
 
@@ -144,49 +169,9 @@ public class MyMonitorDAO implements MonitorDAO {
 	@Override
 	public RequestData init(RequestData data) {
 
-		try {
-			featureType = DataUtilities
-					.createType(
-							dataStoreTypeName,
-							"envelope:com.vividsolutions.jts.geom.Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date,"
-									+ " endTime:Date, totalTime:java.lang.Long, BodyAsString:String, BodyContentLength:java.lang.Long,"
-									+ "Host:String, ErrorMessage:String, HttpMethod:String, HttpReferer:String, InternalHost:String,"
-									+ "Operation:String,OwsVersion:String,QueryString:String, RemoteAddr:String, RemoteCity:String,"
-									+ "RemoteCountry:String, RemoteHost:String,RemoteLat:double,"
-									+ " RemoteLon:double,RemoteUser:String, RemoteUserAgent:String, Resources:String,"
-									+ "ResponseContentType:String, ResponseLength:java.lang.Long, ResponseStatus:int,"
-									+ "Service:String, SubOperation:String,Status:String");
-		} catch (SchemaException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		final Map<String, Serializable> params = dataStoreParams;
-
-		for (Iterator<?> i = DataStoreFinder.getAvailableDataStores(); i
-				.hasNext();) {
-			DataStoreFactorySpi factory = (DataStoreFactorySpi) i.next();
-
-			try {
-				if (factory.canProcess(params)) {
-
-					this.dataStore = factory.createDataStore(params);
-
-					if (!dataStore.getNames().contains(
-							this.featureType.getName())) {
-						dataStore.createSchema(this.featureType);
-					}
-				}
-
-			} catch (Throwable warning) {
-				System.out.println(factory.getDisplayName() + " failed:"
-						+ warning);
-				warning.printStackTrace();
-			}
-		}
-
+		this.initType();
+		this.initStore();
 		save(data);
-
 		return data;
 	}
 
@@ -202,7 +187,7 @@ public class MyMonitorDAO implements MonitorDAO {
 		FilterFactoryImpl factory = new FilterFactoryImpl();
 		Expression exp1 = factory.property("id");
 		Expression exp2 = factory.literal(data.getId());
-		Filter equals = factory.equal(exp1, exp2, false);
+		Filter equals = factory.equals(exp1, exp2);
 
 		try (FeatureWriter<SimpleFeatureType, SimpleFeature> fw = dataStore
 				.getFeatureWriter(dataStoreTypeName, equals, t)) {
@@ -214,13 +199,12 @@ public class MyMonitorDAO implements MonitorDAO {
 
 			t.commit();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE,
+					"Failed to update feature with id " + data.getId(), e);
 		} finally {
 			try {
 				t.rollback();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -229,10 +213,7 @@ public class MyMonitorDAO implements MonitorDAO {
 	protected void toSimpleFeature(SimpleFeature featureToUpdate,
 			RequestData data) {
 
-		// "envelope:Polygon,id:java.lang.Long,queryString:String,path:String,startTime:Date, endTime:Date, totalTime:java.lang.Long");
-
 		if (data.getBbox() != null) {
-
 			com.vividsolutions.jts.geom.Polygon pol = JTS.toGeometry(data
 					.getBbox());
 			featureToUpdate.setAttribute("envelope", pol);
@@ -248,151 +229,132 @@ public class MyMonitorDAO implements MonitorDAO {
 		if (data.getTotalTime() > 0)
 			featureToUpdate.setAttribute("totalTime", data.getTotalTime());
 
-		// data.getBodyAsString(); //data.setBody(body); ??
 		if (data.getBodyAsString() != null) {
 			featureToUpdate
 					.setAttribute("BodyAsString", data.getBodyAsString());
 		}
 
-		// data.getBodyContentLength();
-		// //data.setBodyContentLength(bodyContentLength);
 		if (data.getBodyContentLength() > 0) {
 			featureToUpdate.setAttribute("BodyContentLength",
 					data.getBodyContentLength());
 		}
 
-		// data.getHost(); //data.setHost(host);
 		if (data.getHost() != null) {
 			featureToUpdate.setAttribute("Host", data.getHost());
 		}
 
-		// data.getErrorMessage(); //data.setErrorMessage(errorMessage);
 		if (data.getErrorMessage() != null) {
 			featureToUpdate
 					.setAttribute("ErrorMessage", data.getErrorMessage());
 		}
 
-		// data.getHttpMethod(); //data.setHttpMethod(httpMethod);
 		if (data.getHttpMethod() != null) {
 			featureToUpdate.setAttribute("HttpMethod", data.getHttpMethod());
 		}
 
-		// data.getHttpReferer(); //data.setHttpReferer(httpReferer);
 		if (data.getHttpReferer() != null) {
 			featureToUpdate.setAttribute("HttpReferer", data.getHttpReferer());
 		}
 
-		data.getInternalHost(); // data.setInternalHost(internalHost);
 		if (data.getInternalHost() != null) {
 			featureToUpdate
 					.setAttribute("InternalHost", data.getInternalHost());
 		}
 
-		// data.getOperation(); //data.setOperation(operation);
 		if (data.getOperation() != null) {
 			featureToUpdate.setAttribute("Operation", data.getOperation());
 		}
 
-		// data.getOwsVersion(); //data.setOwsVersion(owsVersion);
 		if (data.getOwsVersion() != null) {
 			featureToUpdate.setAttribute("OwsVersion", data.getOwsVersion());
 		}
 
-		// data.getQueryString(); //data.setQueryString(queryString);
 		if (data.getQueryString() != null) {
 			featureToUpdate.setAttribute("QueryString", data.getQueryString());
 		}
 
-		// data.getRemoteAddr(); //data.setRemoteAddr(remoteAddr);
 		if (data.getRemoteAddr() != null) {
 			featureToUpdate.setAttribute("RemoteAddr", data.getRemoteAddr());
 		}
 
-		// data.getRemoteCity(); //data.setRemoteCity(remoteCity);
 		if (data.getRemoteCity() != null) {
 			featureToUpdate.setAttribute("RemoteCity", data.getRemoteCity());
 		}
 
-		// data.getRemoteCountry(); //data.setRemoteCountry(remoteCountry);
 		if (data.getRemoteCountry() != null) {
 			featureToUpdate.setAttribute("RemoteCountry",
 					data.getRemoteCountry());
 		}
 
-		// data.getRemoteHost(); //data.setRemoteHost(remoteHost);
 		if (data.getRemoteHost() != null) {
 			featureToUpdate.setAttribute("RemoteHost", data.getRemoteHost());
 		}
 
-		// data.getRemoteLat(); //data.setRemoteLat(remoteLat);
 		if (data.getRemoteLat() > 0) {
 			featureToUpdate.setAttribute("RemoteLat", data.getRemoteLat());
 		}
 
-		// data.getRemoteLon(); //data.setRemoteLon(remoteLon);
 		if (data.getRemoteLon() > 0) {
 			featureToUpdate.setAttribute("RemoteLon", data.getRemoteLon());
 		}
 
-		// data.getRemoteUser(); //data.setRemoteUser(remoteUser);
 		if (data.getRemoteUser() != null) {
 			featureToUpdate.setAttribute("RemoteUser", data.getRemoteUser());
 		}
 
-		// data.getRemoteUserAgent();
-		// //data.setRemoteUserAgent(remoteUserAgent);
 		if (data.getRemoteUserAgent() != null) {
 			featureToUpdate.setAttribute("RemoteUserAgent",
 					data.getRemoteUserAgent());
 		}
 
-		// data.getResources(); //data.setResources(resources); tratar lista
 		if (data.getResources() != null && !data.getResources().isEmpty()) {
-			String resources = "";
+			StringBuffer buffer = new StringBuffer();
 			for (String s : data.getResources()) {
-				resources += s + ",";
+				buffer.append(s).append(',');
 			}
-			resources.substring(0, resources.length() - 2);
+			buffer.delete(buffer.length() - 1, buffer.length());
 
-			featureToUpdate.setAttribute("Resources", resources);
+			featureToUpdate.setAttribute("Resources", buffer.toString());
 		}
 
-		// data.getResponseContentType();
-		// //data.setResponseContentType(responseContentType);
 		if (data.getResponseContentType() != null) {
 			featureToUpdate.setAttribute("ResponseContentType",
 					data.getResponseContentType());
 		}
 
-		// data.getResponseLength(); //data.setResponseLength(responseLength);
 		if (data.getResponseLength() > 0) {
 			featureToUpdate.setAttribute("ResponseLength",
 					data.getResponseLength());
 		}
 
-		// data.getResponseStatus(); //data.setResponseStatus(httpStatus);
 		if (data.getResponseStatus() != null) {
 			featureToUpdate.setAttribute("ResponseStatus",
 					data.getResponseStatus());
 		}
 
-		// data.getService(); //data.setService(service);
 		if (data.getService() != null) {
 			featureToUpdate.setAttribute("Service", data.getService());
 		}
 
-		// data.getSubOperation(); //data.setSubOperation(subOperation);
 		if (data.getSubOperation() != null) {
 			featureToUpdate
 					.setAttribute("SubOperation", data.getSubOperation());
 		}
 
-		// data.getStatus();
 		if (data.getStatus() != null) {
 			featureToUpdate.setAttribute("Status", data.getStatus().name());
-
 		}
 
+		if (data.getCategory() != null) {
+			featureToUpdate.setAttribute("Category", data.getCategory().name());
+		}
+
+	}
+
+	private CoordinateReferenceSystem resolve(
+			final CoordinateReferenceSystem crs) {
+		return crs != null ? crs : (config != null
+				&& config.getBboxCrs() != null ? config.getBboxCrs() : CRSI);
 	}
 
 	protected void toRequestData(SimpleFeature feature, RequestData dataToUpdate) {
@@ -400,23 +362,22 @@ public class MyMonitorDAO implements MonitorDAO {
 		if (feature.getAttribute("envelope") != null) {
 
 			com.vividsolutions.jts.geom.Polygon pol = (com.vividsolutions.jts.geom.Polygon) feature
-					.getAttribute("Polygon");
+					.getAttribute("envelope");
 
-			GeometryFactory geometryFactory = JTSFactoryFinder
-					.getGeometryFactory();
-
-			Geometry geo = (Geometry) geometryFactory.toGeometry(pol
-					.getEnvelopeInternal());
-
-			dataToUpdate.setBbox((BoundingBox) geo.getEnvelope());
+			Envelope envelope = pol.getEnvelopeInternal();
+			dataToUpdate.setBbox(new ReferencedEnvelope(envelope.getMinX(),
+					envelope.getMaxX(), envelope.getMinY(), envelope.getMaxY(),
+					resolve(feature.getDefaultGeometryProperty().getBounds()
+							.getCoordinateReferenceSystem())));
 		}
-		dataToUpdate.setId((long) feature.getAttribute("id"));
+		dataToUpdate.setId(((Number) feature.getAttribute("id")).longValue());
 		dataToUpdate.setPath((String) feature.getAttribute("path"));
 		dataToUpdate.setStartTime((Date) feature.getAttribute("startTime"));
 		dataToUpdate.setEndTime((Date) feature.getAttribute("endTime"));
 
 		if (feature.getAttribute("totalTime") != null)
-			dataToUpdate.setTotalTime((long) feature.getAttribute("totalTime"));
+			dataToUpdate.setTotalTime(((Number) feature
+					.getAttribute("totalTime")).longValue());
 
 		if (feature.getAttribute("BodyAsString") != null)
 			dataToUpdate
@@ -424,8 +385,8 @@ public class MyMonitorDAO implements MonitorDAO {
 							.getBytes());
 
 		if (feature.getAttribute("BodyContentLength") != null)
-			dataToUpdate.setBodyContentLength((long) feature
-					.getAttribute("BodyContentLength"));
+			dataToUpdate.setBodyContentLength(((Number) feature
+					.getAttribute("BodyContentLength")).longValue());
 
 		if (feature.getAttribute("Host") != null)
 			dataToUpdate.setHost((String) feature.getAttribute("Host"));
@@ -461,12 +422,12 @@ public class MyMonitorDAO implements MonitorDAO {
 		dataToUpdate.setRemoteHost((String) feature.getAttribute("RemoteHost"));
 
 		if (feature.getAttribute("RemoteLat") != null)
-			dataToUpdate.setRemoteLat((double) feature
-					.getAttribute("RemoteLat"));
+			dataToUpdate.setRemoteLat(((Number) feature
+					.getAttribute("RemoteLat")).doubleValue());
 
 		if (feature.getAttribute("RemoteLon") != null)
-			dataToUpdate.setRemoteLon((double) feature
-					.getAttribute("RemoteLon"));
+			dataToUpdate.setRemoteLon(((Number) feature
+					.getAttribute("RemoteLon")).doubleValue());
 
 		dataToUpdate.setRemoteUser((String) feature.getAttribute("RemoteUser"));
 
@@ -476,20 +437,15 @@ public class MyMonitorDAO implements MonitorDAO {
 		String str = (String) feature.getAttribute("Resources");
 
 		if (str != null) {
-			List<String> list = new LinkedList<String>();
-			for (String s : str.split(",")) {
-				list.add(s);
-			}
-			dataToUpdate.setResources(list);
-
+			dataToUpdate.setResources(Arrays.asList(str.split(",")));
 		}
 
 		dataToUpdate.setResponseContentType((String) feature
 				.getAttribute("ResponseContentType"));
 
 		if (feature.getAttribute("ResponseLength") != null)
-			dataToUpdate.setResponseLength((long) feature
-					.getAttribute("ResponseLength"));
+			dataToUpdate.setResponseLength(((Number) feature
+					.getAttribute("ResponseLength")).longValue());
 
 		dataToUpdate.setResponseStatus((Integer) feature
 				.getAttribute("ResponseStatus"));
@@ -502,6 +458,10 @@ public class MyMonitorDAO implements MonitorDAO {
 		org.geoserver.monitor.RequestData.Status status = org.geoserver.monitor.RequestData.Status
 				.valueOf((String) feature.getAttribute("Status"));
 		dataToUpdate.setStatus(status);
+
+		org.geoserver.monitor.RequestData.Category category = org.geoserver.monitor.RequestData.Category
+				.valueOf((String) feature.getAttribute("Category"));
+		dataToUpdate.setCategory(category);
 
 		//
 	}
@@ -516,18 +476,21 @@ public class MyMonitorDAO implements MonitorDAO {
 			fw.write();
 			t.commit();
 		} catch (IOException e) {
-
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
+			LOGGER.log(Level.SEVERE,
+					"Failed to write feature with id " + data.getId(), e);
 			try {
 				t.rollback();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
-		}
+		} finally {
+			try {
+				t.close();
+			} catch (IOException e) {
+				LOGGER.log(Level.WARNING, "Transanction close failure", e);
+			}
 
+		}
 	}
 
 	@Override
@@ -550,16 +513,15 @@ public class MyMonitorDAO implements MonitorDAO {
 
 		} catch (IOException e) {
 
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Failed to request feature with id " + id,
+					e);
 		} finally {
 			try {
-				t.rollback();
-
+				t.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Transanction close failure", e);
 			}
+
 		}
 		return data;
 	}
@@ -573,8 +535,7 @@ public class MyMonitorDAO implements MonitorDAO {
 	@Override
 	public List<RequestData> getOwsRequests(String service, String operation,
 			String version) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<RequestData>();
 	}
 
 	@Override
@@ -584,33 +545,130 @@ public class MyMonitorDAO implements MonitorDAO {
 	@Override
 	public void dispose() {
 	}
-	
-	
-	public org.opengis.filter.Filter convertFilter(FilterFactoryImpl factory, org.geoserver.monitor.Filter filter) {
 
-		
+	protected org.opengis.filter.Filter convertFilter(
+			FilterFactoryImpl factory, org.geoserver.monitor.Filter filter) {
+
+		if (filter == null) {
+			return Filter.INCLUDE;
+		}
 		if (filter instanceof And) {
-			
-			And andFilter = (And)filter;
+
+			And andFilter = (And) filter;
 			List<org.opengis.filter.Filter> newChildren = new ArrayList<org.opengis.filter.Filter>();
 			for (org.geoserver.monitor.Filter child : andFilter.getFilters()) {
-				newChildren.add(convertFilter(factory,  child));
+				newChildren.add(convertFilter(factory, child));
 			}
-			
+
 			return factory.and(newChildren);
+		} else if (filter instanceof Or) {
+
+			Or orFilter = (Or) filter;
+			List<org.opengis.filter.Filter> newChildren = new ArrayList<org.opengis.filter.Filter>();
+			for (org.geoserver.monitor.Filter child : orFilter.getFilters()) {
+				newChildren.add(convertFilter(factory, child));
+			}
+
+			return factory.or(newChildren);
+		} else {
+			switch (filter.getType()) {
+			case EQ:
+				return factory.equals(factory.property(getName(filter)),
+						factory.literal(getValue(filter)));
+			case GTE:
+				return factory.greaterOrEqual(
+						factory.property(getName(filter)),
+						factory.literal(getValue(filter)), false);
+			case GT:
+				return factory.greater(factory.property(getName(filter)),
+						factory.literal(getValue(filter)));
+			case LTE:
+				return factory.lessOrEqual(factory.property(getName(filter)),
+						factory.literal(getValue(filter)));
+			case LT:
+				return factory.less(factory.property(getName(filter)),
+						factory.literal(getValue(filter)));
+			case NEQ:
+				return factory.notEqual(factory.property(getName(filter)),
+						factory.literal(getValue(filter)));
+			case IN:
+				
+				
+				List<org.opengis.filter.Filter> newChildren = new ArrayList<org.opengis.filter.Filter>();
+				
+				for(Object item: (List)getValue(filter)){
+					Or orFilter = (Or) item;
+					
+					for(Object obj: orFilter.getFilters()){
+						newChildren.add(convertFilter(factory,(org.geoserver.monitor.Filter) obj));
+					}
+				}
+				
+				
+				return factory.or(newChildren);
+				
+
+				//return factory.equal(factory.property(getName(filter)),
+					//	factory.literal(getValue(filter)));
+				
+				
+				//return Filter.INCLUDE;
+			}
+			return Filter.INCLUDE;
 		}
-		else if(filter!=null && filter.getType().compareTo(Comparison.IN)>=0){
-			return factory.greaterOrEqual(factory.property(new NameImpl(filter.getLeft().toString())), factory.literal(filter.getRight()));
-		} else { 
-			
-			
-			//case of null filter
-			Query q = new Query();
-			return q.getFilter();
+	}
+	
+	private Object getValue(org.geoserver.monitor.Filter filter){
+		return isProperty(filter.getLeft()) ? filter.getRight() : filter.getLeft();
+	}
+	
+	private String getPropertyName(org.geoserver.monitor.Filter filter){
+		return isProperty(filter.getLeft()) ? filter.getLeft().toString() : filter.getRight().toString();
+	}
+	
+	boolean isProperty(Object obj) {
+        if (obj instanceof String) {
+            String s = (String) obj;
+            return "resource".equals(s) || OwsUtils.has(new RequestData(), s);
+        }
+        return false;
+    }
+
+	private String resolveName(String name) {
+		for (AttributeDescriptor descriptor : this.featureType
+				.getAttributeDescriptors()) {
+			if (descriptor.getLocalName().equalsIgnoreCase(name))
+				return descriptor.getLocalName();
 		}
-		
+		return name;
 	}
 
+	private Name getName(org.geoserver.monitor.Filter filter) {
+		return new NameImpl(resolveName(filter.getLeft().toString()));
+	}
+
+	private Filter getQueryFilter(org.geoserver.monitor.Query query) {
+		final FilterFactoryImpl factory = new FilterFactoryImpl();
+		Filter queryFilter = query == null ? Filter.INCLUDE : convertFilter(
+				factory, query.getFilter());
+
+		if (query != null && query.getToDate() != null
+				&& query.getFromDate() != null) {
+			Filter betweenFilter = factory.between(
+					factory.property(new NameImpl("startTime")),
+					factory.literal(query.getFromDate()),
+					factory.literal(query.getToDate()));
+			// short cut...do not want to add a needless 'and' operation
+			// between INCLUDE and between
+			if (queryFilter == Filter.INCLUDE)
+				queryFilter = betweenFilter;
+			else {
+				betweenFilter = factory.and(Arrays.asList(queryFilter,
+						betweenFilter));
+			}
+		}
+		return queryFilter;
+	}
 
 	@Override
 	public List<RequestData> getRequests(org.geoserver.monitor.Query query) {
@@ -619,34 +677,25 @@ public class MyMonitorDAO implements MonitorDAO {
 
 		Transaction t = new DefaultTransaction("handle");
 
-		FilterFactoryImpl factory = new FilterFactoryImpl();
-		Expression exp1 = factory.property("Query");
-		Expression exp2 = factory.literal(query);
-		Filter equals = factory.equal(exp1, exp2, false);
-		
-		Filter filt = convertFilter(factory, query.getFilter());
-		
-	
 		try (FeatureReader<SimpleFeatureType, SimpleFeature> fw = dataStore
-				.getFeatureReader(new Query(dataStoreTypeName, filt), t)) {
+				.getFeatureReader(new Query(dataStoreTypeName,
+						getQueryFilter(query)), t)) {
 
-			if (fw.hasNext()) {
+			while (fw.hasNext()) {
 				RequestData data = new RequestData();
 				toRequestData(fw.next(), data);
 				list.add(data);
-				t.commit();
+
 			}
-
+			t.commit();
 		} catch (IOException e) {
-
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Cannot execute query "
+					+ getQueryFilter(query), e);
 		} finally {
 			try {
-				t.rollback();
+				t.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Transanction close failure", e);
 			}
 		}
 		return list;
@@ -664,8 +713,32 @@ public class MyMonitorDAO implements MonitorDAO {
 
 	@Override
 	public long getCount(org.geoserver.monitor.Query query) {
-		// TODO
-		return 0;
+
+		int count = 0;
+		Transaction t = new DefaultTransaction("handle");
+
+		try (FeatureReader<SimpleFeatureType, SimpleFeature> fw = dataStore
+				.getFeatureReader(new Query(dataStoreTypeName,
+						getQueryFilter(query)), t)) {
+
+			while (fw.hasNext()) {
+				RequestData data = new RequestData();
+				toRequestData(fw.next(), data);
+				count++;
+
+			}
+			t.commit();
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE, "Cannot execute query "
+					+ getQueryFilter(query), e);
+		} finally {
+			try {
+				t.close();
+			} catch (IOException e) {
+				LOGGER.log(Level.WARNING, "Transanction close failure", e);
+			}
+		}
+		return count;
 	}
 
 	@Override

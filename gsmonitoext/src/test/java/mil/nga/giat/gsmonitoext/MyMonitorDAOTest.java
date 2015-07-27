@@ -1,108 +1,286 @@
 package mil.nga.giat.gsmonitoext;
 
-
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-
-
-
-
-
-
-
-
 import org.apache.commons.io.FileUtils;
+import org.geoserver.monitor.Filter;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.Query;
 import org.geoserver.monitor.Query.Comparison;
+import org.geoserver.monitor.Query.SortOrder;
 import org.geoserver.monitor.RequestData;
+import org.geoserver.monitor.RequestData.Category;
 import org.geoserver.monitor.RequestData.Status;
-import org.junit.Before;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
-public class MyMonitorDAOTest
-{
+public class MyMonitorDAOTest {
 
-	MyMonitorDAO dao = new MyMonitorDAO();
+	static MyMonitorDAO dao = new MyMonitorDAO();
 
-	GeometryFactory factory = new GeometryFactory(
-			new PrecisionModel(
-					PrecisionModel.FIXED));
-	@Before
-	public void setup()
-			throws IOException {
-		
-		File dataDir = new File(
-				"testdata");
-		if (dataDir.exists()) FileUtils.deleteDirectory(dataDir);
-	//	if (!dataDir.exists()) dataDir.mkdirs();
-		Map params = new HashMap();
+	GeometryFactory factory = new GeometryFactory(new PrecisionModel(
+			PrecisionModel.FIXED));
+
+	@BeforeClass
+	public static void setup() throws IOException {
+
+		File dataDir = new File("testdata");
+		if (dataDir.exists())
+			FileUtils.deleteDirectory(dataDir);
+
+		Map<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put("dbtype", "h2");
-	    params.put("database", "testdata/db");
+		params.put("database", "testdata/db");
 		MonitorConfig config = new MonitorConfig();
 		dao.setDataStoreTypeName("MonitorRequestData");
 		dao.setDataStoreParams(params);
 		dao.init(config);
+
+		// create and add sample data for ALL tests
+		dao.add(getSample(33));
+		RequestData data2 = getSample(34);
+		data2.setHost("remote");
+		data2.setTotalTime(100);
+		data2.setBody("bigger body".getBytes("UTF-8"));
+		data2.setBodyContentLength(data2.getBody().length);
+		dao.add(data2);
+		RequestData data3 = getSample(35);
+		data3.setTotalTime(101);
+		dao.add(data3);
 	}
 
-	/*
-	@Test void testMappings() {
-		// need to add a protected feature type access method to the DAO
-		final SimpleFeatureBuilder builder = new SimpleFeatureBuilder(dao.getFeatureType());
-		final SimpleFeature feature = builder.buildFeature("123");
-		final RequestData request = new RequestData();
-		
-		// put some test data in each attribute..ignore Error and body[] for now
-		request.setBbox(factory.createPolygon...etc...));
-		request.setHost("localhost");
-		...etc....
-		
-		dao.toSimpleFeature(feature, request);
-		final RequestData copyOfRequest = new RequestData();
-		dao.toRequestData(feature, copyOfRequest);
-		
-		// did the bi-directional mapping work...check each attribute
-		assertEquals(request.getHost(), copyOfRequest.getHost());
-		...etc....
-	}*/
+	private static RequestData getSample(int id)
+			throws UnsupportedEncodingException {
+		RequestData data = new RequestData();
+		data.setBbox(new ReferencedEnvelope(-5, 5, -10, 10, MyMonitorDAO.CRSI));
+		data.setBody("body".getBytes("UTF-8"));
+		data.setBodyContentLength(data.getBody().length);
+		data.setCategory(Category.REST);
+		data.setErrorMessage("Error");
+		data.setHost("local");
+		data.setPath("path");
+		data.setQueryString("?x=y&z=w");
+		data.setId(id);
+		data.setRemoteLat(0.1);
+		data.setRemoteLon(0.2);
+		data.setService("test");
+		data.setRemoteUser("user");
+		data.setRemoteCountry("country");
+		data.setRemoteCity("city");
+		data.setOperation("operation");
+		data.setSubOperation("sub");
+		data.setHttpMethod("POST");
+		data.setHttpReferer("localhost");
+		data.setStatus(Status.RUNNING);
+		data.setResponseStatus(44);
+		data.setTotalTime(99);
+		Calendar c = Calendar.getInstance();
+		data.setEndTime(c.getTime());
+		c.set(Calendar.MINUTE, c.get(Calendar.MINUTE) - 1);
+		data.setStartTime(c.getTime());
+		return data;
+	}
+
+	@Test
+	public void testMappings() throws UnsupportedEncodingException { // need to
+																		// add a
+																		// protected
+																		// feature
+																		// type
+
+		RequestData data = getSample(33);
+
+		SimpleFeatureBuilder builder = new SimpleFeatureBuilder(
+				dao.getFeatureType());
+
+		Object attributes[] = new Object[dao.getFeatureType()
+				.getAttributeCount()];
+		for (int i = 0; i < attributes.length; i++) {
+			attributes[i] = dao.getFeatureType().getDescriptor(i)
+					.getDefaultValue();
+		}
+		SimpleFeature sample = builder.buildFeature("test123", attributes);
+
+		RequestData result = new RequestData();
+		dao.toSimpleFeature(sample, data);
+		dao.toRequestData(sample, result);
+
+		assertEquals(data.getBbox(), result.getBbox());
+		assertEquals(data.getBodyAsString(), result.getBodyAsString());
+		assertEquals(data.getBodyContentLength(), result.getBodyContentLength());
+		assertEquals(data.getCategory(), result.getCategory());
+		assertEquals(data.getEndTime(), result.getEndTime());
+		assertEquals(data.getStartTime(), result.getStartTime());
+		assertEquals(data.getOperation(), result.getOperation());
+		assertEquals(data.getStatus(), result.getStatus());
+		assertEquals(data.getErrorMessage(), result.getErrorMessage());
+		assertEquals(data.getHost(), result.getHost());
+		assertEquals(data.getRemoteUser(), result.getRemoteUser());
+		assertEquals(data.getRemoteHost(), result.getRemoteHost());
+		assertEquals(data.getBodyContentType(), result.getBodyContentType());
+		assertEquals(data.getId(), result.getId());
+		assertEquals(data.getResources(), result.getResources());
+		assertEquals(data.getResponseStatus(), result.getResponseStatus());
+		assertEquals(data.getRemoteLat(), result.getRemoteLat(), 0.001);
+		assertEquals(data.getRemoteLon(), result.getRemoteLon(), 0.001);
+		assertEquals(data.getTotalTime(), result.getTotalTime(), 0.001);
+
+	}
+
+	@Test
+	public void test() throws IOException {
+
+		List<RequestData> dataSet = dao.getRequests();
+		assertEquals(3, dataSet.size());
+		assertEquals(33, dataSet.get(0).getId());
+		assertEquals(34, dataSet.get(1).getId());
+		assertEquals(35, dataSet.get(2).getId());
+	}
+
+	@Test
+	public void testQueryById() throws IOException {
+		RequestData data = dao.getRequest(33);
+		assertTrue(data != null);
+	}
+
+	@Test
+	public void testCount() throws IOException {
+		assertEquals(3, dao.getCount(null));
+	}
+
+	@Test
+	public void testGTE() throws Exception {
+
+		Query query = new Query();
+		query.filter("totalTime", 100, Comparison.GTE);
+		List<RequestData> results = dao.getRequests(query);
+		assertEquals(2, results.size());
+	}
+
+	public void testLTE() throws Exception {
+
+		Query query = new Query();
+		query.filter("totalTime", 100, Comparison.LTE);
+		List<RequestData> results = dao.getRequests(query);
+		assertEquals(2, results.size());
+	}
+
+	@Test
+	public void testOr() throws Exception {
+
+		Query query = new Query();
+		query.filter("totalTime", 100, Comparison.LT);
+		query.or("totalTime", 100, Comparison.GT);
+		List<RequestData> results = dao.getRequests(query);
+		assertEquals(2, results.size());
+	}
+
+	@Test
+	public void testAnd() throws Exception {
+
+		Query query = new Query();
+		query.filter("totalTime", 100, Comparison.LTE);
+		query.and("BodyContentLength", 5, Comparison.LT);
+		List<RequestData> results = dao.getRequests(query);
+		assertEquals(1, results.size());
+	}
+
+	@Test
+	public void testLT() throws Exception {
+
+		Query query = new Query();
+		query.filter("totalTime", 100, Comparison.LT);
+		List<RequestData> results = dao.getRequests(query);
+		assertEquals(1, results.size());
+	}
+
+	@Test
+	public void testEquals() throws Exception {
+
+		Query query = new Query();
+		query.filter("totalTime", 100, Comparison.EQ);
+		List<RequestData> results = dao.getRequests(query);
+		assertEquals(1, results.size());
+	}
+
+	@Test
+	public void testGT() throws Exception {
+
+		Query query = new Query();
+		query.filter("totalTime", 100, Comparison.GT);
+		List<RequestData> results = dao.getRequests(query);
+		assertEquals(1, results.size());
+	}
+	
+	
+	
+	
 	
 	@Test
-	public void test()
-			throws IOException {
-
-		dao.add(new RequestData());
+	public void testGetRequestsFilterIN3() throws Exception {
+		List<RequestData> datas = dao.getRequests(new Query().filter("widgets",
+				"resources", Comparison.IN));
+		// assertCovered(datas, 11, 14, 18);
 	}
 
+	@Test
+	public void testGetRequestsFilterAnd() throws Exception {
+		assertEquals(
+				1,
+				dao.getRequests(
+						new Query().filter("path", "/foo", Comparison.EQ)
+								.filter("widgets", "resources", Comparison.IN))
+						.size());
+	}
 
-	
-	  
-	    
-	   
-	 
-	    @Test
-	    public void testGetRequestsPaged() throws Exception {
-	        List<RequestData> datas = dao.getRequests(new Query().page(0l, 99l));
-	        
-	        
-	    }
-	    
-	    
-	    @Test
-	    public void testGetRequestsFilterIN() throws Exception {
-	        List<RequestData> datas = dao.getRequests(
-	            new Query().filter("path", Arrays.asList("/two", "/seven"), Comparison.IN ));
-	        
-	    }
-	    
-	    
-	    
+	@Test
+	public void testGetRequestsFilterOr() throws Exception {
+		assertEquals(
+				4,
+				dao.getRequests(
+						new Query().filter("path", "/seven", Comparison.EQ).or(
+								"widgets", "resources", Comparison.IN)).size());
+	}
+
+	@Test
+	public void testGetRequestsJoinIN() throws Exception {
+		List<String> resources = Arrays.asList("widgets", "things");
+		List<RequestData> datas = dao.getRequests(new Query()
+				.properties("resource").aggregate("count()")
+				.filter("resource", resources, Comparison.IN).group("resource")
+				.sort("resource", SortOrder.ASC));
+
+		assertEquals(2, datas.size());
+		assertEquals("things", datas.get(0).getResources().get(0));
+		assertEquals("widgets", datas.get(1).getResources().get(0));
+	}
+
+	@Test
+	public void testGetRequestsAdvancedFilter() throws Exception {
+		Filter filter = new Filter("path", "/four", Comparison.EQ)
+				.or(new Filter("service", "foo", Comparison.EQ).and(new Filter(
+						"resource", Arrays.asList("widgets"), Comparison.IN)));
+
+		List<RequestData> datas = dao.getRequests(new Query().filter(filter));
+		assertEquals(2, datas.size());
+
+		// assertCovered(datas, 4, 11);
+	}
 }
