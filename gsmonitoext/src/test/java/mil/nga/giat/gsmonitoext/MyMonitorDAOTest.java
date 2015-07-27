@@ -234,53 +234,14 @@ public class MyMonitorDAOTest {
 	
 	
 	@Test
-	public void testGetRequestsFilterIN3() throws Exception {
-		List<RequestData> datas = dao.getRequests(new Query().filter("widgets",
-				"resources", Comparison.IN));
-		// assertCovered(datas, 11, 14, 18);
+	public void testIN() throws Exception {
+		Query query = new Query();
+		query.filter("totalTime", Arrays.asList(new Long(100), new Long(101)), Comparison.IN);
+		List<RequestData> results = dao.getRequests(query);
+		assertEquals(1, results.size());
 	}
 
-	@Test
-	public void testGetRequestsFilterAnd() throws Exception {
-		assertEquals(
-				1,
-				dao.getRequests(
-						new Query().filter("path", "/foo", Comparison.EQ)
-								.filter("widgets", "resources", Comparison.IN))
-						.size());
-	}
+	
 
-	@Test
-	public void testGetRequestsFilterOr() throws Exception {
-		assertEquals(
-				4,
-				dao.getRequests(
-						new Query().filter("path", "/seven", Comparison.EQ).or(
-								"widgets", "resources", Comparison.IN)).size());
-	}
-
-	@Test
-	public void testGetRequestsJoinIN() throws Exception {
-		List<String> resources = Arrays.asList("widgets", "things");
-		List<RequestData> datas = dao.getRequests(new Query()
-				.properties("resource").aggregate("count()")
-				.filter("resource", resources, Comparison.IN).group("resource")
-				.sort("resource", SortOrder.ASC));
-
-		assertEquals(2, datas.size());
-		assertEquals("things", datas.get(0).getResources().get(0));
-		assertEquals("widgets", datas.get(1).getResources().get(0));
-	}
-
-	@Test
-	public void testGetRequestsAdvancedFilter() throws Exception {
-		Filter filter = new Filter("path", "/four", Comparison.EQ)
-				.or(new Filter("service", "foo", Comparison.EQ).and(new Filter(
-						"resource", Arrays.asList("widgets"), Comparison.IN)));
-
-		List<RequestData> datas = dao.getRequests(new Query().filter(filter));
-		assertEquals(2, datas.size());
-
-		// assertCovered(datas, 4, 11);
-	}
+	
 }

@@ -44,6 +44,7 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
+import org.opengis.geometry.Geometry;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -592,27 +593,14 @@ public class MyMonitorDAO implements MonitorDAO {
 				return factory.notEqual(factory.property(getName(filter)),
 						factory.literal(getValue(filter)));
 			case IN:
-				
-				
 				List<org.opengis.filter.Filter> newChildren = new ArrayList<org.opengis.filter.Filter>();
 				
 				for(Object item: (List)getValue(filter)){
-					Or orFilter = (Or) item;
 					
-					for(Object obj: orFilter.getFilters()){
-						newChildren.add(convertFilter(factory,(org.geoserver.monitor.Filter) obj));
-					}
+					factory.equals(factory.property(getName(filter)),
+							factory.literal(getValue(filter)));
 				}
-				
-				
 				return factory.or(newChildren);
-				
-
-				//return factory.equal(factory.property(getName(filter)),
-					//	factory.literal(getValue(filter)));
-				
-				
-				//return Filter.INCLUDE;
 			}
 			return Filter.INCLUDE;
 		}
