@@ -238,7 +238,7 @@ public class MyMonitorDAOTest {
 		Query query = new Query();
 		query.filter("totalTime", Arrays.asList(new Long(100), new Long(101)), Comparison.IN);
 		List<RequestData> results = dao.getRequests(query);
-		assertEquals(1, results.size());
+		assertEquals(2, results.size());
 	}
 
 	

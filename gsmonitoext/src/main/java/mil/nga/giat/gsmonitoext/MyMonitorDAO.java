@@ -44,6 +44,8 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
+import org.opengis.filter.expression.Literal;
+import org.opengis.filter.expression.PropertyName;
 import org.opengis.geometry.Geometry;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -594,33 +596,42 @@ public class MyMonitorDAO implements MonitorDAO {
 						factory.literal(getValue(filter)));
 			case IN:
 				List<org.opengis.filter.Filter> newChildren = new ArrayList<org.opengis.filter.Filter>();
-				
-				for(Object item: (List)getValue(filter)){
+				for (Object item : (List) getValue(filter)) {
 					
-					factory.equals(factory.property(getName(filter)),
-							factory.literal(getValue(filter)));
+					//newChildren.add(factory.equals(
+						//	factory.property(getName(filter)),
+							//factory.literal(getValue(filter))));
+					
+					
+					for(Object obj: (List)getValue(filter)){
+						newChildren.add(factory.equals(
+								factory.property(getName(filter)),
+								factory.literal(obj)));
+					}
 				}
 				return factory.or(newChildren);
 			}
 			return Filter.INCLUDE;
 		}
 	}
-	
-	private Object getValue(org.geoserver.monitor.Filter filter){
-		return isProperty(filter.getLeft()) ? filter.getRight() : filter.getLeft();
+
+	private Object getValue(org.geoserver.monitor.Filter filter) {
+		return isProperty(filter.getLeft()) ? filter.getRight() : filter
+				.getLeft();
 	}
-	
-	private String getPropertyName(org.geoserver.monitor.Filter filter){
-		return isProperty(filter.getLeft()) ? filter.getLeft().toString() : filter.getRight().toString();
+
+	private String getPropertyName(org.geoserver.monitor.Filter filter) {
+		return isProperty(filter.getLeft()) ? filter.getLeft().toString()
+				: filter.getRight().toString();
 	}
-	
+
 	boolean isProperty(Object obj) {
-        if (obj instanceof String) {
-            String s = (String) obj;
-            return "resource".equals(s) || OwsUtils.has(new RequestData(), s);
-        }
-        return false;
-    }
+		if (obj instanceof String) {
+			String s = (String) obj;
+			return "resource".equals(s) || OwsUtils.has(new RequestData(), s);
+		}
+		return false;
+	}
 
 	private String resolveName(String name) {
 		for (AttributeDescriptor descriptor : this.featureType
