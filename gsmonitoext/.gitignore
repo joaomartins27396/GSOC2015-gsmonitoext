@@ -1,5 +1,10 @@
-.testdata
-.project
-.settings
-.target
 .DS_Store
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Maven
+log/
+target/
