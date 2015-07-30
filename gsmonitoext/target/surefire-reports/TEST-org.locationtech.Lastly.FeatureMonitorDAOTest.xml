@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite tests="11" failures="0" name="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" time="0.184" errors="0" skipped="0">
+<testsuite tests="11" failures="0" name="org.locationtech.Lastly.FeatureMonitorDAOTest" time="0.112" errors="0" skipped="0">
   <properties>
     <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
     <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib"/>
@@ -7,7 +7,7 @@
     <property name="user.country.format" value="PT"/>
     <property name="gopherProxySet" value="false"/>
     <property name="java.vm.vendor" value="Oracle Corporation"/>
-    <property name="maven.multiModuleProjectDirectory" value="/Users/joaomartins/Documents/GSOC2015/testes/gsmonitoext"/>
+    <property name="maven.multiModuleProjectDirectory" value="/Users/joaomartins/Documents/GSOC2015/gitgsmonitoext/GSOC2015-gsmonitoext/gsmonitoext"/>
     <property name="java.vendor.url" value="http://java.oracle.com/"/>
     <property name="path.separator" value=":"/>
     <property name="guice.disable.misplaced.annotation.check" value="true"/>
@@ -17,7 +17,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.os.patch.level" value="unknown"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-    <property name="user.dir" value="/Users/joaomartins/Documents/GSOC2015/testes/gsmonitoext"/>
+    <property name="user.dir" value="/Users/joaomartins/Documents/GSOC2015/gitgsmonitoext/GSOC2015-gsmonitoext/gsmonitoext"/>
     <property name="java.runtime.version" value="1.8.0_05-b13"/>
     <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
     <property name="java.endorsed.dirs" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre/lib/endorsed"/>
@@ -63,15 +63,15 @@
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="test" time="0.03"/>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="testMappings" time="0"/>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="testQueryById" time="0.102"/>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="testCount" time="0.004"/>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="testGTE" time="0.021"/>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="testOr" time="0.007"/>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="testAnd" time="0.006"/>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="testLT" time="0.003"/>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="testEquals" time="0.003"/>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="testGT" time="0.003"/>
-  <testcase classname="mil.nga.giat.gsmonitoext.MyMonitorDAOTest" name="testIN" time="0.005"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="test" time="0.023"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="testMappings" time="0"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="testQueryById" time="0.044"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="testCount" time="0.004"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="testGTE" time="0.017"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="testOr" time="0.007"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="testAnd" time="0.005"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="testLT" time="0.003"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="testEquals" time="0.003"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="testGT" time="0.003"/>
+  <testcase classname="org.locationtech.Lastly.FeatureMonitorDAOTest" name="testIN" time="0.003"/>
 </testsuite>
