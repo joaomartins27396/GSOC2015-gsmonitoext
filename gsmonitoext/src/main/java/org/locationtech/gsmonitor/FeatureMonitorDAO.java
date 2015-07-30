@@ -1,4 +1,4 @@
-package org.locationtech.Lastly;
+package org.locationtech.gsmonitor;
 
 import java.io.IOException;
 import java.io.Serializable;

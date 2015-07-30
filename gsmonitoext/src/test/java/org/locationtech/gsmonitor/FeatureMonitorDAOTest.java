@@ -1,4 +1,4 @@
-package org.locationtech.Lastly;
+package org.locationtech.gsmonitor;
 
 import static org.junit.Assert.*;
 
@@ -26,7 +26,7 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.locationtech. Lastly.FeatureMonitorDAO;
+import org.locationtech. gsmonitor.FeatureMonitorDAO;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.GeometryFactory;

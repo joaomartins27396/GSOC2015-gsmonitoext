@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>mil.nga.giat</groupId>
-	<artifactId>gsmonitoext</artifactId>
+	<groupId>org.locationtech</groupId>
+	<artifactId>gsmonitor</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<packaging>jar</packaging>
@@ -82,7 +82,7 @@
 		<mvn.spring.version>3.1.0.RELEASE</mvn.spring.version>
 		<mvn.project.build.sourceEncoding>UTF-8</mvn.project.build.sourceEncoding>
 		<mvn.var1>Hello</mvn.var1>
-		<mvn.main.class>mil.nga.giat.gsmonitoext.Main</mvn.main.class>
+		<mvn.main.class>org.locationtech.gsmonitor.Main</mvn.main.class>
 
 		<!-- log4j -->
 		<mvn.log4j.rootCategory>WARN</mvn.log4j.rootCategory>
