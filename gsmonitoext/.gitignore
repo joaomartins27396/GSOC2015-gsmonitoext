@@ -1,4 +1,5 @@
-*/testdata
-*/.project
-*/.settings
-*/.target
+.testdata
+.project
+.settings
+.target
+.DS_Store
