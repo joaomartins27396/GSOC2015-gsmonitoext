@@ -18,7 +18,6 @@ import org.geoserver.monitor.And;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.MonitorDAO;
 import org.geoserver.monitor.Or;
-import org.geoserver.monitor.Query.Comparison;
 import org.geoserver.monitor.RequestData;
 import org.geoserver.monitor.RequestDataVisitor;
 import org.geoserver.ows.util.OwsUtils;
@@ -44,9 +43,6 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
-import org.opengis.filter.expression.Literal;
-import org.opengis.filter.expression.PropertyName;
-import org.opengis.geometry.Geometry;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -54,7 +50,8 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class FeatureMonitorDAO implements MonitorDAO {
 
-	private final static Logger LOGGER = Logging.getLogger(FeatureMonitorDAO.class);
+	private final static Logger LOGGER = Logging
+			.getLogger(FeatureMonitorDAO.class);
 
 	public static final String TYPENAME = "requestDataFeature";
 	private DataStore dataStore = null;
@@ -77,10 +74,12 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	// need a way to set/get this via Spring setter/getter
 	private Map<String, Serializable> dataStoreParams = new HashMap<String, Serializable>();
 
+	public FeatureMonitorDAO() {
+	}
+
 	@Override
 	public String getName() {
 		return "vector";
-		//return "SimpleFeature Monitor";
 	}
 
 	public SimpleFeatureType getFeatureType() {
@@ -597,18 +596,10 @@ public class FeatureMonitorDAO implements MonitorDAO {
 						factory.literal(getValue(filter)));
 			case IN:
 				List<org.opengis.filter.Filter> newChildren = new ArrayList<org.opengis.filter.Filter>();
-				for (Object item : (List) getValue(filter)) {
-					
-					//newChildren.add(factory.equals(
-						//	factory.property(getName(filter)),
-							//factory.literal(getValue(filter))));
-					
-					
-					for(Object obj: (List)getValue(filter)){
-						newChildren.add(factory.equals(
-								factory.property(getName(filter)),
-								factory.literal(obj)));
-					}
+				for (Object obj : (List) getValue(filter)) {
+					newChildren.add(factory.equals(
+							factory.property(getName(filter)),
+							factory.literal(obj)));
 				}
 				return factory.or(newChildren);
 			}
@@ -644,7 +635,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	}
 
 	private Name getName(org.geoserver.monitor.Filter filter) {
-		return new NameImpl(resolveName(filter.getLeft().toString()));
+		return new NameImpl(resolveName(getPropertyName(filter)));
 	}
 
 	private Filter getQueryFilter(org.geoserver.monitor.Query query) {
