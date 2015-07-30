@@ -3,6 +3,7 @@
 # Eclipse
 .classpath
 .project
+.testdata
 .settings/
 
 # Maven
