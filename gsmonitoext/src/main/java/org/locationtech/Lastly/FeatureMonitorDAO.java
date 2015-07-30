@@ -1,4 +1,4 @@
-package mil.nga.giat.gsmonitoext;
+package org.locationtech.Lastly;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -52,9 +52,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class MyMonitorDAO implements MonitorDAO {
+public class FeatureMonitorDAO implements MonitorDAO {
 
-	private final static Logger LOGGER = Logging.getLogger(MyMonitorDAO.class);
+	private final static Logger LOGGER = Logging.getLogger(FeatureMonitorDAO.class);
 
 	public static final String TYPENAME = "requestDataFeature";
 	private DataStore dataStore = null;
@@ -79,7 +79,8 @@ public class MyMonitorDAO implements MonitorDAO {
 
 	@Override
 	public String getName() {
-		return "SimpleFeature Monitor";
+		return "vector";
+		//return "SimpleFeature Monitor";
 	}
 
 	public SimpleFeatureType getFeatureType() {

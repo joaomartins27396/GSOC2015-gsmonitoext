@@ -1,4 +1,4 @@
-package mil.nga.giat.gsmonitoext;
+package org.locationtech.Lastly;
 
 import static org.junit.Assert.*;
 
@@ -26,14 +26,15 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech. Lastly.FeatureMonitorDAO;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
-public class MyMonitorDAOTest {
+public class FeatureMonitorDAOTest {
 
-	static MyMonitorDAO dao = new MyMonitorDAO();
+	static FeatureMonitorDAO dao = new FeatureMonitorDAO();
 
 	GeometryFactory factory = new GeometryFactory(new PrecisionModel(
 			PrecisionModel.FIXED));
@@ -69,7 +70,7 @@ public class MyMonitorDAOTest {
 	private static RequestData getSample(int id)
 			throws UnsupportedEncodingException {
 		RequestData data = new RequestData();
-		data.setBbox(new ReferencedEnvelope(-5, 5, -10, 10, MyMonitorDAO.CRSI));
+		data.setBbox(new ReferencedEnvelope(-5, 5, -10, 10, FeatureMonitorDAO.CRSI));
 		data.setBody("body".getBytes("UTF-8"));
 		data.setBodyContentLength(data.getBody().length);
 		data.setCategory(Category.REST);
