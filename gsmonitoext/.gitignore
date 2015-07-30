@@ -3,6 +3,8 @@
 # Eclipse
 .classpath
 .project
+.classpath
+.project
 testdata/
 .settings/
 
