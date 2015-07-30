@@ -1,6 +1,7 @@
-package org.locationtech.Lastly;
+package org.locationtech.gsmonitor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,16 +10,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.geoserver.monitor.Filter;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.Query;
 import org.geoserver.monitor.Query.Comparison;
-import org.geoserver.monitor.Query.SortOrder;
 import org.geoserver.monitor.RequestData;
 import org.geoserver.monitor.RequestData.Category;
 import org.geoserver.monitor.RequestData.Status;
@@ -26,7 +24,6 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.locationtech. Lastly.FeatureMonitorDAO;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
