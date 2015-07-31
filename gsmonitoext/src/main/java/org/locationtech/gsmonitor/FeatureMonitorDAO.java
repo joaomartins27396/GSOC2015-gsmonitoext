@@ -180,6 +180,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 
 	@Override
 	public void add(RequestData data) {
+		if (data.getBbox() == null) return;
 		this.save(data);
 	}
 
@@ -187,6 +188,11 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	public void update(RequestData data) {
 		Transaction t = new DefaultTransaction("handle");
 
+		if (data.getId() <= 0) {
+			data.setId(System.currentTimeMillis());
+			this.add(data);
+			return;
+		}
 		FilterFactoryImpl factory = new FilterFactoryImpl();
 		Expression exp1 = factory.property("id");
 		Expression exp2 = factory.literal(data.getId());
@@ -477,6 +483,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 			SimpleFeature newFeature = fw.next();
 			toSimpleFeature(newFeature, data);
 			fw.write();
+			fw.close();
 			t.commit();
 		} catch (IOException e) {
 			LOGGER.log(Level.SEVERE,
