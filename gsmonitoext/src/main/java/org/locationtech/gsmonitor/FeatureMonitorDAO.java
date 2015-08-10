@@ -1,6 +1,12 @@
 package org.locationtech.gsmonitor;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +20,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geoserver.config.GeoServerDataDirectory;
 import org.geoserver.monitor.And;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.MonitorDAO;
@@ -56,6 +63,12 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	public static final String TYPENAME = "requestDataFeature";
 	private DataStore dataStore = null;
 	private MonitorConfig config;
+
+	private GeoServerDataDirectory dataDirectory;
+
+	public void setDataDirectory(GeoServerDataDirectory dataDir) {
+		this.dataDirectory = dataDir;
+	}
 
 	public static CoordinateReferenceSystem CRSI;
 
@@ -155,6 +168,39 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	@Override
 	public void init(MonitorConfig config) {
 
+		File monitoringDir = null;
+		try {
+			monitoringDir = dataDirectory.findOrCreateDir("monitoring");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		File dbprops = new File(monitoringDir, "featureStore.properties");
+		if (dbprops.exists()) {
+			
+			try {
+				BufferedReader bufferReader = new BufferedReader(new FileReader(dbprops));
+				
+				String out = "";
+				Map<String, Serializable> params = new HashMap<String, Serializable>();
+				while ((out = bufferReader.readLine()) != null) {
+					String[] newParams = out.split("=");
+					params.put(newParams[0], newParams[1]);
+				}
+				setDataStoreParams(params);
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			
+			// / add code: open the property file here
+			// add code: for each property, add the property into the
+			// dataStoreParams
+		}
+
 		this.config = config;
 		Enumeration<Object> key = config.getProperties().keys();
 		while (key.hasMoreElements()) {
@@ -187,12 +233,14 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	@Override
 	public void update(RequestData data) {
 		Transaction t = new DefaultTransaction("handle");
-
+		
+		
 		if (data.getId() <= 0) {
 			data.setId(System.currentTimeMillis());
 			this.add(data);
 			return;
 		}
+
 		FilterFactoryImpl factory = new FilterFactoryImpl();
 		Expression exp1 = factory.property("id");
 		Expression exp2 = factory.literal(data.getId());

@@ -8,6 +8,6 @@
     http://www.springframework.org/schema/tx/spring-tx.xsd" 
     default-autowire="byName">
     
-    <bean id="featureMonitorDAO" class="org.locationtech.gsmonitor.FeatureMonitorDAO">
+    <bean id="FeatureMonitorDAO" class="org.locationtech.gsmonitor.FeatureMonitiorDAO">
     </bean>
 </beans>
