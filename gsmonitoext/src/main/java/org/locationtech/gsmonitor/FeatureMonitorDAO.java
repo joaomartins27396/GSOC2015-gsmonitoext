@@ -175,7 +175,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		File dbprops = new File(monitoringDir, "GeoserverApplication.properties");
+		File dbprops = new File(monitoringDir, "featureMonitor.properties");
 		if (dbprops.exists()) {
 			
 			try {
@@ -184,8 +184,10 @@ public class FeatureMonitorDAO implements MonitorDAO {
 				String out = "";
 				Map<String, Serializable> params = new HashMap<String, Serializable>();
 				while ((out = bufferReader.readLine()) != null) {
-					String[] newParams = out.split("=");
-					params.put(newParams[0], newParams[1]);
+					if(out.length()>0&&out.toCharArray()[0]!='#'){
+						String[] newParams = out.split("=");
+						params.put(newParams[0].trim(), newParams[1].trim());
+					}
 				}
 				setDataStoreParams(params);
 				

@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.geoserver.config.GeoServerDataDirectory;
@@ -45,18 +46,19 @@ public class FeatureMonitorDAOTest {
 			FileUtils.deleteDirectory(dataDir);
 
 		Map<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put("dbtype", "h2");
-		params.put("database", "testdata/db");
+		//params.put("dbtype", "h2");
+		//params.put("database", "testdata/db");
+		
+		java.util.Properties prop = new Properties();
 		
 		
 		
-		
-		dao.setDataDirectory(new GeoServerDataDirectory(new File("test/resources/monitoring")));
+		dao.setDataDirectory(new GeoServerDataDirectory(new File("src/test/resources/")));
 		
 		
 		MonitorConfig config = new MonitorConfig();
 		dao.setDataStoreTypeName("MonitorRequestData");
-		dao.setDataStoreParams(params);
+		//dao.setDataStoreParams(params);
 		dao.init(config);
 
 		// create and add sample data for ALL tests
