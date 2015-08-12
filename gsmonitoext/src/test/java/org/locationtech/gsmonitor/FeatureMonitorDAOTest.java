@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.geoserver.config.GeoServerDataDirectory;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.monitor.Query;
 import org.geoserver.monitor.Query.Comparison;
@@ -46,6 +47,13 @@ public class FeatureMonitorDAOTest {
 		Map<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put("dbtype", "h2");
 		params.put("database", "testdata/db");
+		
+		
+		
+		
+		dao.setDataDirectory(new GeoServerDataDirectory(new File("test/resources/monitoring")));
+		
+		
 		MonitorConfig config = new MonitorConfig();
 		dao.setDataStoreTypeName("MonitorRequestData");
 		dao.setDataStoreParams(params);

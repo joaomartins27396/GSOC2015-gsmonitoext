@@ -175,7 +175,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		File dbprops = new File(monitoringDir, "featureStore.properties");
+		File dbprops = new File(monitoringDir, "GeoserverApplication.properties");
 		if (dbprops.exists()) {
 			
 			try {
