@@ -76,7 +76,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		try {
 			CRSI = CRS.decode("EPSG:4326");
 		} catch (FactoryException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Failed to CRS decode",
+					e);
 		}
 	}
 
@@ -84,7 +85,6 @@ public class FeatureMonitorDAO implements MonitorDAO {
 
 	String dataStoreTypeName = TYPENAME;
 
-	// need a way to set/get this via Spring setter/getter
 	private Map<String, Serializable> dataStoreParams = new HashMap<String, Serializable>();
 
 	public FeatureMonitorDAO() {
@@ -111,7 +111,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		return dataStoreParams;
 	}
 
-	public void setDataStoreParams(Map<String, Serializable> dataStoreParams) {
+	private void setDataStoreParams(Map<String, Serializable> dataStoreParams) {
 		this.dataStoreParams = dataStoreParams;
 	}
 
@@ -172,8 +172,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		try {
 			monitoringDir = dataDirectory.findOrCreateDir("monitoring");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Failed to find or create the monitoring directory",
+					e);
 		}
 		File dbprops = new File(monitoringDir, "featureMonitor.properties");
 		if (dbprops.exists()) {
@@ -192,15 +192,10 @@ public class FeatureMonitorDAO implements MonitorDAO {
 				setDataStoreParams(params);
 				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.log(Level.SEVERE, "Failed to read the file in monitoring directory",
+						e);
+				
 			}
-			
-			
-			
-			// / add code: open the property file here
-			// add code: for each property, add the property into the
-			// dataStoreParams
 		}
 
 		this.config = config;
@@ -214,9 +209,6 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		this.initStore();
 
 	}
-
-	// When is this used...do we need to implement something here...like setting
-	// certain attributes
 	@Override
 	public RequestData init(RequestData data) {
 
@@ -264,7 +256,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 			try {
 				t.rollback();
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.SEVERE, "Failed to rollback",
+						e);
 			}
 		}
 	}
@@ -522,7 +515,6 @@ public class FeatureMonitorDAO implements MonitorDAO {
 				.valueOf((String) feature.getAttribute("Category"));
 		dataToUpdate.setCategory(category);
 
-		//
 	}
 
 	@Override
@@ -541,7 +533,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 			try {
 				t.rollback();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				LOGGER.log(Level.SEVERE, "Failed to rollback",
+						e1);
 			}
 		} finally {
 			try {
@@ -706,8 +699,6 @@ public class FeatureMonitorDAO implements MonitorDAO {
 					factory.property(new NameImpl("startTime")),
 					factory.literal(query.getFromDate()),
 					factory.literal(query.getToDate()));
-			// short cut...do not want to add a needless 'and' operation
-			// between INCLUDE and between
 			if (queryFilter == Filter.INCLUDE)
 				queryFilter = betweenFilter;
 			else {
