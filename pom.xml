@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.locationtech</groupId>
+	<artifactId>gsmonitor-parent</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>GS Monitor Parent POM</name>
+	<packaging>pom</packaging>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+	<properties>
+		<geotools.version>13.1</geotools.version>
+		<geoserver.version>2.7.1</geoserver.version>
+		<geotools.scope>compile</geotools.scope>
+		<mvn.spring.version>3.1.0.RELEASE</mvn.spring.version>
+	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.geotools.jdbc</groupId>
+				<artifactId>gt-jdbc-h2</artifactId>
+				<version>${geotools.version}</version>
+				<scope>${geotools.scope}</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.geoserver.web</groupId>
+				<artifactId>gs-web-core</artifactId>
+				<version>${geoserver.version}</version>
+				<scope>${geotools.scope}</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.geoserver</groupId>
+				<artifactId>gs-main</artifactId>
+				<version>${geoserver.version}</version>
+				<scope>${geotools.scope}</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.geoserver.extension</groupId>
+				<artifactId>gs-monitor-core</artifactId>
+				<version>${geoserver.version}</version>
+				<scope>${geotools.scope}</scope>
+			</dependency>
+			<dependency>
+						<groupId>org.springframework</groupId>
+									<artifactId>spring-context</artifactId>
+												<version>${mvn.spring.version}</version>
+														</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<modules>
+		<module>gsmonitor</module>
+		<module>gsmonitor_web</module>
+	</modules>
+	<repositories>
+			<repository>
+						<id>akathist-repository</id>
+									<name>Akathist Repository</name>
+												<url>http://www.9stmaryrd.com/maven</url>
+														</repository>
+																<repository>
+																			<id>boundless</id>
+																						<snapshots>
+																										<enabled>true</enabled>
+																													</snapshots>
+																																<name>Boundless Maven Repository</name>
+																																			<url>http://repo.boundlessgeo.com/main</url>
+																																					</repository>
+																																							<repository>
+																																										<id>osgeo</id>
+																																													<name>Open Source Geospatial Foundation Repository</name>
+																																																<url>http://download.osgeo.org/webdav/geotools/</url>
+																																																		</repository>
+																																																			</repositories>
+</project>

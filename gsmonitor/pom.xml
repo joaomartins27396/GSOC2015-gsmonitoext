@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>gsmonitor-parent</artifactId>
+		<groupId>org.locationtech</groupId>
+		<relativePath>..</relativePath>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
 
 	<groupId>org.locationtech</groupId>
 	<artifactId>gsmonitor</artifactId>
@@ -14,31 +21,21 @@
 		<dependency>
 			<groupId>org.geoserver.extension</groupId>
 			<artifactId>gs-monitor-core</artifactId>
-			<version>2.7.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.geoserver</groupId>
 			<artifactId>gs-main</artifactId>
-			<version>2.7.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.geotools.jdbc</groupId>
 			<artifactId>gt-jdbc-h2</artifactId>
-			<version>13.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>${mvn.spring.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.3.6</version>
 		</dependency>
 
 		<dependency>
@@ -79,12 +76,7 @@
 	</dependencies>
 
 	<properties>
-		<mvn.spring.version>3.1.0.RELEASE</mvn.spring.version>
 		<mvn.project.build.sourceEncoding>UTF-8</mvn.project.build.sourceEncoding>
-		<mvn.var1>Hello</mvn.var1>
-		<mvn.main.class>org.locationtech.gsmonitor.Main</mvn.main.class>
-
-		<!-- log4j -->
 		<mvn.log4j.rootCategory>WARN</mvn.log4j.rootCategory>
 		<mvn.log4j.category.org.springframework.beans.factory>WARN</mvn.log4j.category.org.springframework.beans.factory>
 	</properties>
