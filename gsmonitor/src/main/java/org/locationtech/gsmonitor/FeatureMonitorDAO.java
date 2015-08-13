@@ -199,6 +199,7 @@ public class FeatureMonitorDAO implements
 					}
 				}
 				setDataStoreParams(params);
+				bufferReader.close();
 
 			}
 			catch (IOException e) {
