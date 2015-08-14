@@ -1,49 +1,43 @@
 package org.locationtech.gsmonitor.web;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.extensions.markup.html.form.select.Select;
 import org.apache.wicket.extensions.markup.html.form.select.SelectOption;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.web.GeoServerBasePage;
+import org.locationtech.gsmonitor.*;
 
-public class GSMonitorPage extends
-		GeoServerBasePage
-{
+public class GSMonitorPage extends GeoServerBasePage {
 
 	private String selected = "jQuery";
 
 	public GSMonitorPage() {
-		Select options = new Select(
-				"options",
-				new PropertyModel<String>(
-						this,
-						"selected"));
-		add(options);
-		options.add(new SelectOption<String>(
-				"framework1",
-				new Model<String>(
-						"Wicket")));
-		options.add(new SelectOption<String>(
-				"framework2",
-				new Model<String>(
-						"Spring MVC")));
-		options.add(new SelectOption<String>(
-				"framework3",
-				new Model<String>(
-						"JSF 2.0")));
-		options.add(new SelectOption<String>(
-				"Script1",
-				new Model<String>(
-						"jQuery")));
-		options.add(new SelectOption<String>(
-				"Script2",
-				new Model<String>(
-						"prototype")));
+		FeatureMonitorDAO dao = new FeatureMonitorDAO();
 
-		add(new Label(
-				"hellolabel",
-				"Hello World!"));
+		List<DataStoreInfo> dataStores = getCatalog().getStores(
+				DataStoreInfo.class);
+		List store = new ArrayList<String>();
+
+		if (dataStores != null) {
+			for (DataStoreInfo data : dataStores) {
+				if (data != null) {
+					store.add(data.getName());
+				}
+			}
+		}
+
+		DropDownChoice<String> options = new DropDownChoice<String>("options",
+				store);
+		add(options);
+
+		add(new Label("hellolabel", "Hello World!"));
 
 	}
 
