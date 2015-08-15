@@ -63,6 +63,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	public static final String TYPENAME_PROP_NAME = "mds.type";
 	public static final String DSID_PROP_NAME = "mds.id";
 	public static final String FEATURE_PROP_FILENAME = "featureMonitor.properties";
+	public static final int MAX_SIZE = 255;
 	private DataStore dataStore = null;
 	private MonitorConfig config;
 	private boolean configured = false;
@@ -355,7 +356,13 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		}
 		// need to fix this...null is not allowed
 		com.vividsolutions.jts.geom.Polygon pol = (data.getBbox() != null) ? JTS
-				.toGeometry(data.getBbox()) : null;
+				.toGeometry(data.getBbox()) : JTS.toGeometry(new ReferencedEnvelope(
+						CRSI.getCoordinateSystem().getAxis(0).getMinimumValue(),
+						CRSI.getCoordinateSystem().getAxis(0).getMaximumValue(),
+						CRSI.getCoordinateSystem().getAxis(1).getMinimumValue(),
+						CRSI.getCoordinateSystem().getAxis(1).getMaximumValue(),
+						CRSI));
+				
 		featureToUpdate.setAttribute("envelope", pol);
 		featureToUpdate.setAttribute("id", data.getId());
 		featureToUpdate.setAttribute("path", data.getPath());
@@ -409,7 +416,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		}
 
 		if (data.getQueryString() != null) {
-			featureToUpdate.setAttribute("QueryString", data.getQueryString());
+			featureToUpdate.setAttribute("QueryString", clip(data.getQueryString()));
 		}
 
 		if (data.getRemoteAddr() != null) {
@@ -497,7 +504,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	}
 
 	private String clip(String value) {
-		return (value.length() > 255) ? value.substring(0, 255) : value;
+		return (value.length() > MAX_SIZE) ? value.substring(0, MAX_SIZE) : value;
 	}
 
 	protected void toRequestData(SimpleFeature feature, RequestData dataToUpdate) {
