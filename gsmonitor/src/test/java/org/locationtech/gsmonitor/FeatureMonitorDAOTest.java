@@ -12,7 +12,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.geoserver.config.GeoServerDataDirectory;
@@ -34,6 +33,7 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 public class FeatureMonitorDAOTest {
 
 	static FeatureMonitorDAO dao = new FeatureMonitorDAO();
+	static final MonitorConfig config = new MonitorConfig();
 
 	GeometryFactory factory = new GeometryFactory(new PrecisionModel(
 			PrecisionModel.FIXED));
@@ -45,10 +45,7 @@ public class FeatureMonitorDAOTest {
 		if (dataDir.exists())
 			FileUtils.deleteDirectory(dataDir);
 
-		dao.setDataDirectory(new GeoServerDataDirectory(new File("src/test/resources/")));
-		
-		
-		MonitorConfig config = new MonitorConfig();
+		dao.setDataDirectory(new GeoServerDataDirectory(new File("src/test/resources/")));		
 		dao.setDataStoreTypeName("MonitorRequestData");
 		dao.init(config);
 
@@ -240,7 +237,19 @@ public class FeatureMonitorDAOTest {
 		assertEquals(2, results.size());
 	}
 
-	
+
+	@Test
+	public void testSave() throws IOException {
+		FeatureMonitorDAO dao = new FeatureMonitorDAO();
+		dao.setDataDirectory(new GeoServerDataDirectory(new File("target")));		
+		dao.setDataStoreTypeName("MonitorRequestData");
+		Map<String, Serializable> stuff = new HashMap<String, Serializable>();
+		stuff.put("x","y");
+		dao.updateDataStoreProperties("foo",stuff);
+		dao.init(config);
+		assertEquals(FileUtils.readLines(new File("src/test/resources/featureMonitor.expected")), 
+				FileUtils.readLines(new File("target/monitoring/featureMonitor.properties")));
+	}
 
 	
 }
