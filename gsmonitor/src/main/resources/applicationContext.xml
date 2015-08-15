@@ -9,8 +9,6 @@
     default-autowire="byName">
     
     <bean id="FeatureMonitorDAO" class="org.locationtech.gsmonitor.FeatureMonitorDAO">
-    <property name="dataDirectory" ref="dataDirectory" />
+        <property name="dataDirectory" ref="dataDirectory" />
     </bean>
-    
-    
 </beans>
