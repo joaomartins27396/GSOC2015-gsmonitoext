@@ -5,8 +5,13 @@ The tool is extension to the [GeoSever Monitor](http://docs.geoserver.org/latest
 The tool captures WMS Map Request meta-data, converts them to OpenGIS Simple Features and stores in them a vector data store.
 
 The intent of the effort is to provide a map request data capture tool in support analytics for map requests over time. 
-One such use case is identifying trends of interest in specific geographic areas.  For example, map requests for a particular city
-may increase during a period of special events such as World Cup games, as visitors seek directions, places to eat, etc.
+One such use case is identifying trends of interest in specific geographic areas.  For example, map requests for a particular city may increase during a period of special events such as World Cup games, as visitors seek directions, places to eat, etc.
+
+The Geometry capture for each map request is the bounding box converted into a square polygon in the 'envelope' attribute of the simple feature.  In absence of bounding box, the envelope assumes the world using default CRS EPSG:4236.
+
+The monitor, oddly enough, sends many requests with an 'id' of -1.  These are set to the current time in milliseconds from the epoch (January 1st, 1970).  
+
+Since some data stores have issues with String attributes exceeding 255 characters, all string attributes are clipped at 255 characters.
 
 ## Installing the Monitor
 
@@ -35,3 +40,8 @@ The default name of the feature type describing a WMS request is 'requestDataFea
 ```
 mds.type=wmsMetaData
 ```
+## Configuring the Monitor using the UI
+
+Accompany the monitor is an additional tool to configure the monitor within GeoServer.  This section provides installation and examples of use.
+
+TBD
