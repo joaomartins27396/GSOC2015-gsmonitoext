@@ -1,6 +1,6 @@
 # GS Feature Monitor
 
-GS Feature Monitor is open source software initially developed as part of GSoC (Google Summer of Code) under the mentorship of [LocationTech](www.locationtech.org).
+GS Feature Monitor is open source software initially developed as part of GSoC (Google Summer of Code) under the mentorship of [LocationTech](http://www.locationtech.org).
 The tool is extension to the [GeoSever Monitor](http://docs.geoserver.org/latest/en/user/extensions/monitoring/index.html).
 The tool captures WMS Map Request meta-data, converts them to OpenGIS Simple Features and stores in them a vector data store.
 
@@ -29,4 +29,9 @@ dbtype=h2
 6. Copy the target jar file from 'gsmonitor/target' directory to the GeoServer's web application 'lib' directory.
 ```
 % cp .\gsmonitor\target\gsmonitor-0.0.1-SNAPSHOT.jar  E:\geoserver-2.7.0-bin\webapps\geoserver\WEB-INF\lib
+```
+
+The default name of the feature type describing a WMS request is 'requestDataFeature'.  The default can be changed by editing the featureMonitor.properties, as described above, setting the property 'mds.type' to the type name.
+```
+mds.type=wmsMetaData
 ```
