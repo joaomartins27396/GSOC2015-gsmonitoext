@@ -33,9 +33,9 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 			final MonitorConfig config = new MonitorConfig(getCatalog()
 					.getResourceLoader());
 
-			final FeatureMonitorDAO dao = new FeatureMonitorDAO();
+			final FeatureMonitorDAO dao = FeatureMonitorDAO.lookupMonitor(config);
 			dao.init(config);
-			final String configuredStoreID = "";
+			final String configuredStoreID =  dao.getStoreID();
 
 			final List<DataStoreInfo> dataStores = getCatalog().getStores(
 

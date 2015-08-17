@@ -237,7 +237,9 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	 * If configured through the UI, returns a id.
 	 */
 	public String getStoreID() {
-		return this.dataStoreParams.get(DSID_PROP_NAME).toString();
+		if (dataStoreParams.containsKey(DSID_PROP_NAME)) return 
+				dataStoreParams.get(DSID_PROP_NAME).toString(); 
+		else return null;
 	}
 
 	@Override
