@@ -89,8 +89,13 @@
 			</resource>
 			<resource>
 				<directory>src/test/resources</directory>
-				<filtering>true</filtering>
+				<excludes>
+				    <exclude>*.expected</exclude>
+					<exclude>**</exclude>
+				</excludes>
+				<filtering>false</filtering>
 			</resource>
+
 		</resources>
 		<pluginManagement>
 			<plugins>
