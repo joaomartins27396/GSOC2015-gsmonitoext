@@ -3,6 +3,7 @@ package org.locationtech.gsmonitor.web;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.text.html.Option;
@@ -12,8 +13,10 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.Model;
 import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.monitor.MonitorConfig;
@@ -26,6 +29,7 @@ import org.locationtech.gsmonitor.*;
 public class GSMonitorPage extends GeoServerSecuredPage {
 
 	private String selectedDataStoreName = "selected";
+	private String dataStoreInUse = "";
 
 	public GSMonitorPage() {
 
@@ -59,33 +63,19 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 			}
 
-			add(new Label("hellolabel", "DataStores"));
+			
 
 			Form form = new Form("form", new Model(this));
 
 			form.setOutputMarkupId(true);
 
 			add(form);
+			
+			form.add(new Label("dsName", Model.of("DataStore in use: "+dataStoreInUse)));
 
 			final DropDownChoice<String> option = new DropDownChoice<String>(
 					"options", new Model(selectedDataStoreName),
-
 					store);
-
-			// has a data store been configured already?
-			if (selectedDataStoreName != null) {
-
-				// //////////////////////////////////////////////////////////////////////
-				// I am thinking in change the text of the label if the
-				// DataStore already exits and if the user press the button it
-				// don't do nothing
-
-				// ///////////////////////////////////////////////////////////////
-				// TODO, set the options to display the currently configured
-				// store
-				// should display with 'check' box next to it.
-			}
-
 			form.add(option);
 
 			form.add(new AjaxButton("save", form) {
@@ -101,11 +91,10 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 						for (DataStoreInfo dsi : dataStores) {
 
 							if (dsi.getName().equals(selected)) {
-
 								dao.updateDataStoreProperties(dsi.getName(),
 										dsi.getConnectionParameters());
 								dao.init(config);
-
+								dataStoreInUse = dsi.getName();
 								return;
 
 							}
@@ -117,6 +106,28 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 				}
 
 			});
+			
+
+			form.add(new Label("featureType", Model.of(dao.getDataStoreTypeName())));
+			
+			
+			
+			
+
+			final TextField<String> newFeatureType = new TextField<String>("newFeatureType",new Model());
+			form.add(newFeatureType);
+			
+			
+			form.add(new AjaxButton("saveFeatureType", form) {
+
+				protected void onSubmit(AjaxRequestTarget target, Form f) {
+
+					LOGGER.log(Level.SEVERE, "deteted"+newFeatureType.getInputName());
+					dao.setDataStoreTypeName(newFeatureType.getInputName());
+
+				}
+
+			});
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -124,12 +135,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 	}
 
-	public String getSelectedDataStoreName() {
-		return selectedDataStoreName;
-	}
 
-	public void setSelectedDataStoreName(String selectedDataStoreName) {
-		this.selectedDataStoreName = selectedDataStoreName;
-	}
+
 
 }

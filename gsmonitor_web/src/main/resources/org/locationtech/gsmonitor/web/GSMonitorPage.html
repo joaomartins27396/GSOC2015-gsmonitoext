@@ -1,11 +1,19 @@
 <html>
   <body>
       <wicket:extend>
-         <div wicket:id="hellolabel"></div>
+         
         <form wicket:id="form">
-
-         <select wicket:id="options" id="options" ></select>
-         <input type="submit" wicket:id="save"></input>
+        <div wicket:id="dsName"></div>
+          <p>
+         <select wicket:id="options" ></select>
+         <input type="submit" wicket:id="save" value= "Save"></input>
+         </p>
+        
+         <div wicket:id="featureType"></div>
+         <p>
+         <input wicket:id="newFeatureType" type="text" size="20" />
+		<input type="submit" wicket:id="saveFeatureType" value= "Save"></input>
+		</p>
          </form>
       </wicket:extend>
 
