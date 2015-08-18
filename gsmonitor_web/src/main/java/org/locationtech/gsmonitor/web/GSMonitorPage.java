@@ -103,7 +103,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 							if (dsi.getName().equals(selected)) {
 
 								dao.updateDataStoreProperties(dsi.getName(),
-										dsi.getMetadata().getMap());
+										dsi.getConnectionParameters());
 								dao.init(config);
 
 								return;
