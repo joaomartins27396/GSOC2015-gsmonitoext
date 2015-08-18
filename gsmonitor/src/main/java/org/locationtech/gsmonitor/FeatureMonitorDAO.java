@@ -65,6 +65,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	public static final String FEATURE_PROP_FILENAME = "featureMonitor.properties";
 	public static final int MAX_SIZE = 255;
 	private DataStore dataStore = null;
+	private String dataStoreName = null;
 	private MonitorConfig config;
 	private boolean configured = false;
 
@@ -130,7 +131,9 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	}
 
 	private synchronized void initType() {
-		if (featureType == null) {
+		if (featureType == null
+				|| !featureType.getName().getLocalPart()
+						.equals(dataStoreTypeName)) {
 			try {
 				featureType = DataUtilities
 						.createType(
@@ -151,6 +154,14 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	}
 
 	private synchronized void initStore() {
+		final String requestDataStoreName = (String) dataStoreParams
+				.get(DSID_PROP_NAME);
+		if (requestDataStoreName != null
+				&& !requestDataStoreName.equals(dataStoreName)
+				&& dataStore != null) {
+			dataStore.dispose();
+			dataStore = null;
+		}
 		if (dataStore == null) {
 			final Map<String, Serializable> params = dataStoreParams;
 
@@ -168,6 +179,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 							dataStore.createSchema(this.featureType);
 						}
 					}
+					dataStoreName = (String) params.get(DSID_PROP_NAME);
 
 				} catch (Throwable warning) {
 					LOGGER.warning(factory.getDisplayName() + " failed:"
@@ -237,9 +249,10 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	 * If configured through the UI, returns a id.
 	 */
 	public String getStoreID() {
-		if (dataStoreParams.containsKey(DSID_PROP_NAME)) return 
-				dataStoreParams.get(DSID_PROP_NAME).toString(); 
-		else return null;
+		if (dataStoreParams.containsKey(DSID_PROP_NAME))
+			return dataStoreParams.get(DSID_PROP_NAME).toString();
+		else
+			return null;
 	}
 
 	@Override
@@ -254,6 +267,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		}
 		this.initType();
 		this.initStore();
+
 		configured = true;
 	}
 
@@ -358,13 +372,14 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		}
 		// need to fix this...null is not allowed
 		com.vividsolutions.jts.geom.Polygon pol = (data.getBbox() != null) ? JTS
-				.toGeometry(data.getBbox()) : JTS.toGeometry(new ReferencedEnvelope(
+				.toGeometry(data.getBbox())
+				: JTS.toGeometry(new ReferencedEnvelope(
 						CRSI.getCoordinateSystem().getAxis(0).getMinimumValue(),
 						CRSI.getCoordinateSystem().getAxis(0).getMaximumValue(),
 						CRSI.getCoordinateSystem().getAxis(1).getMinimumValue(),
 						CRSI.getCoordinateSystem().getAxis(1).getMaximumValue(),
 						CRSI));
-				
+
 		featureToUpdate.setAttribute("envelope", pol);
 		featureToUpdate.setAttribute("id", data.getId());
 		featureToUpdate.setAttribute("path", data.getPath());
@@ -378,8 +393,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 			featureToUpdate.setAttribute("totalTime", data.getTotalTime());
 
 		if (data.getBodyAsString() != null) {
-			featureToUpdate
-					.setAttribute("BodyAsString", clip(data.getBodyAsString()));
+			featureToUpdate.setAttribute("BodyAsString",
+					clip(data.getBodyAsString()));
 		}
 
 		if (data.getBodyContentLength() > 0) {
@@ -401,7 +416,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		}
 
 		if (data.getHttpReferer() != null) {
-			featureToUpdate.setAttribute("HttpReferer", clip(data.getHttpReferer()));
+			featureToUpdate.setAttribute("HttpReferer",
+					clip(data.getHttpReferer()));
 		}
 
 		if (data.getInternalHost() != null) {
@@ -410,7 +426,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		}
 
 		if (data.getOperation() != null) {
-			featureToUpdate.setAttribute("Operation",clip( data.getOperation()));
+			featureToUpdate
+					.setAttribute("Operation", clip(data.getOperation()));
 		}
 
 		if (data.getOwsVersion() != null) {
@@ -418,7 +435,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 		}
 
 		if (data.getQueryString() != null) {
-			featureToUpdate.setAttribute("QueryString", clip(data.getQueryString()));
+			featureToUpdate.setAttribute("QueryString",
+					clip(data.getQueryString()));
 		}
 
 		if (data.getRemoteAddr() != null) {
@@ -506,7 +524,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	}
 
 	private String clip(String value) {
-		return (value.length() > MAX_SIZE) ? value.substring(0, MAX_SIZE) : value;
+		return (value.length() > MAX_SIZE) ? value.substring(0, MAX_SIZE)
+				: value;
 	}
 
 	protected void toRequestData(SimpleFeature feature, RequestData dataToUpdate) {
