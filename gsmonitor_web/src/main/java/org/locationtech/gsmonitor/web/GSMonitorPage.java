@@ -41,13 +41,13 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 			if (dataStores != null) {
 
-				for (DataStoreInfo data : dataStores) {
+				for (DataStoreInfo dataStore : dataStores) {
 
-					if (data != null) {
+					if (dataStore != null && dataStore.isEnabled()) {
 
-						store.add(data.getName());
-						if (data.getName().equals(configuredStoreID))
-							selectedDataStoreName = data.getName();
+						store.add(dataStore.getName());
+						if (dataStore.getName().equals(configuredStoreID))
+							selectedDataStoreName = dataStore.getName();
 
 					}
 
@@ -126,7 +126,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 						}
 
-						message = "dataStore not finded";
+						message = "Data Store not valid";
 						adminMessageModel.setObject("Messages: " + message);
 						target.addComponent(adminMessage);
 
