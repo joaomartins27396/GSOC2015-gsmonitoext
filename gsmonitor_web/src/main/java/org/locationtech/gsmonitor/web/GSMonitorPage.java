@@ -20,7 +20,6 @@ import org.locationtech.gsmonitor.*;
 public class GSMonitorPage extends GeoServerSecuredPage {
 
 	private String selectedDataStoreName = "selected";
-	private String dataStoreInUse = "";
 	private String message = "";
 
 	public GSMonitorPage() {
@@ -55,7 +54,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 				}
 
 			}
-			final Model<String> adminMessageModel = Model.of("Mensages: "
+			final Model<String> adminMessageModel = Model.of("Messages: "
 					+ message);
 			final Label adminMessage = new Label("adminMessage",
 					adminMessageModel);
@@ -69,7 +68,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 			add(form);
 
 			final Model<String> dsNameModel = Model.of("DataStore in use: "
-					+ dataStoreInUse);
+					+ dao.getStoreID());
 			final Label dsName = new Label("dsName", dsNameModel);
 			dsName.setOutputMarkupId(true);
 			form.add(dsName);
@@ -108,19 +107,18 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 								dao.updateDataStoreProperties(dsi.getName(),
 										dsi.getConnectionParameters());
 								dao.init(config);
-								dataStoreInUse = dsi.getName();
 
 								message = "Monitor Configured";
-								adminMessageModel.setObject("Mensages: "
+								adminMessageModel.setObject("Messages: "
 										+ message);
 								target.addComponent(adminMessage);
 
 								featureTypeModel.setObject("FeatureType: "
-										+ dao.getStoreID());
+										+ dao.getDataStoreTypeName());
 								target.addComponent(featureType);
 
 								dsNameModel.setObject("DataStore in use: "
-										+ dao.getDataStoreTypeName());
+										+ dao.getStoreID());
 								target.addComponent(dsName);
 
 								return;
@@ -129,7 +127,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 						}
 
 						message = "dataStore not finded";
-						adminMessageModel.setObject("Mensages: " + message);
+						adminMessageModel.setObject("Messages: " + message);
 						target.addComponent(adminMessage);
 
 					}
