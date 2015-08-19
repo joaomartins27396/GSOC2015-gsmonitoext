@@ -116,11 +116,11 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 								target.addComponent(adminMessage);
 
 								featureTypeModel.setObject("FeatureType: "
-										+ dao.getDataStoreTypeName());
+										+ dao.getStoreID());
 								target.addComponent(featureType);
 
 								dsNameModel.setObject("DataStore in use: "
-										+ dataStoreInUse);
+										+ dao.getDataStoreTypeName());
 								target.addComponent(dsName);
 
 								return;
