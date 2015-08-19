@@ -49,4 +49,9 @@ mds.type=wmsMetaData
 
 Accompany the monitor is an additional tool to configure the monitor within GeoServer.  This section provides installation and examples of use.
 
-TBD
+### Installing the Monitor UI Tool
+Copy the target jar file from gsmonitor_web/target directory to the GeoServer's web application 'lib' directory.
+``` 
+% cp .\gsmonitor_web\target\gsmonitor_web-0.0.1-SNAPSHOT.jar  E:\geoserver-2.7.0-bin\webapps\geoserver\WEB-INF\lib
+```
+### Using the Tool
