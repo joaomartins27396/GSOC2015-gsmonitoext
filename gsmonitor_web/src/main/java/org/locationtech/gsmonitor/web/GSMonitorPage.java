@@ -3,6 +3,7 @@ package org.locationtech.gsmonitor.web;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -54,23 +55,22 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 				}
 
 			}
-			final Model<String> adminMessageModel =Model.of("Mensages: "+message);
-			final Label adminMessage = new Label("adminMessage", adminMessageModel);
+			final Model<String> adminMessageModel = Model.of("Mensages: "
+					+ message);
+			final Label adminMessage = new Label("adminMessage",
+					adminMessageModel);
 			adminMessage.setOutputMarkupId(true);
 			add(adminMessage);
-			
-			
-			
+
 			Form form = new Form("form", new Model(this));
 
 			form.setOutputMarkupId(true);
 
 			add(form);
-			
-			
+
 			final Model<String> dsNameModel = Model.of("DataStore in use: "
 					+ dataStoreInUse);
-			final Label dsName = new Label("dsName",dsNameModel );
+			final Label dsName = new Label("dsName", dsNameModel);
 			dsName.setOutputMarkupId(true);
 			form.add(dsName);
 
@@ -78,10 +78,9 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 					"options", new Model(selectedDataStoreName), store);
 			form.add(option);
 
-			
-			final Model<String> featureTypeModel = Model.of("FeatureType: "+dao
-					.getDataStoreTypeName());
-			final Label featureType = new Label("featureType", featureTypeModel); 
+			final Model<String> featureTypeModel = Model.of("FeatureType: "
+					+ dao.getDataStoreTypeName());
+			final Label featureType = new Label("featureType", featureTypeModel);
 			featureType.setOutputMarkupId(true);
 			form.add(featureType);
 
@@ -92,10 +91,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 			form.add(new AjaxButton("save", form) {
 
 				protected void onSubmit(AjaxRequestTarget target, Form f) {
-					
-					
-					
-					
+
 					String selected = option.getModelObject();
 
 					if (selected != null) {
@@ -105,33 +101,35 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 						for (DataStoreInfo dsi : dataStores) {
 
 							if (dsi.getName().equals(selected)) {
-								//set the featureType
-								dao.setDataStoreTypeName(newFeatureType.getInputName());
-								//set the dataStore
+								// set the featureType
+								dao.setDataStoreTypeName(newFeatureType
+										.getInputName());
+								// set the dataStore
 								dao.updateDataStoreProperties(dsi.getName(),
 										dsi.getConnectionParameters());
 								dao.init(config);
 								dataStoreInUse = dsi.getName();
-								
-								
-								
+
 								message = "Monitor Configured";
-								adminMessageModel.setObject("Mensages: "+message);
+								adminMessageModel.setObject("Mensages: "
+										+ message);
 								target.addComponent(adminMessage);
-								
-								featureTypeModel.setObject("FeatureType: "+dao.getDataStoreTypeName());
+
+								featureTypeModel.setObject("FeatureType: "
+										+ dao.getDataStoreTypeName());
 								target.addComponent(featureType);
-								
-								dsNameModel.setObject("DataStore in use: "+ dataStoreInUse);
+
+								dsNameModel.setObject("DataStore in use: "
+										+ dataStoreInUse);
 								target.addComponent(dsName);
-								
+
 								return;
 							}
 
 						}
-						
+
 						message = "dataStore not finded";
-						adminMessageModel.setObject("Mensages: "+message);
+						adminMessageModel.setObject("Mensages: " + message);
 						target.addComponent(adminMessage);
 
 					}
@@ -140,8 +138,8 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 			});
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Monitor Configure Can't be Initialised",
+					e1);
 		}
 
 	}
