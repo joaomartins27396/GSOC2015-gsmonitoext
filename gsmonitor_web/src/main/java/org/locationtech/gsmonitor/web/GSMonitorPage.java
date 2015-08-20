@@ -19,13 +19,15 @@ import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.web.GeoServerSecuredPage;
 import org.locationtech.gsmonitor.*;
 
-public class GSMonitorPage extends GeoServerSecuredPage implements Serializable {
+public class GSMonitorPage extends GeoServerSecuredPage {
+
+	public static final long serialVersionUID = 438L;
 
 	private String selectedDataStoreName = "selected";
 	private String message = "";
 	transient Holder holder = null;
 	Model<String> adminMessageModel;
-	Label adminMessage ;
+	Label adminMessage;
 	Model<String> dsNameModel;
 	Label dsName;
 	DropDownChoice<String> option;
@@ -62,8 +64,7 @@ public class GSMonitorPage extends GeoServerSecuredPage implements Serializable 
 			}
 
 		}
-		adminMessageModel = Model
-				.of("Messages: " + message);
+		adminMessageModel = Model.of("Messages: " + message);
 		adminMessage = new Label("adminMessage", adminMessageModel);
 		adminMessage.setOutputMarkupId(true);
 		add(adminMessage);
@@ -74,14 +75,13 @@ public class GSMonitorPage extends GeoServerSecuredPage implements Serializable 
 
 		add(form);
 
-		dsNameModel = Model.of("DataStore in use: "
-				+ dao.getStoreID());
+		dsNameModel = Model.of("DataStore in use: " + dao.getStoreID());
 		dsName = new Label("dsName", dsNameModel);
 		dsName.setOutputMarkupId(true);
 		form.add(dsName);
 
-		option = new DropDownChoice<String>(
-				"options", new Model(selectedDataStoreName), store);
+		option = new DropDownChoice<String>("options", new Model(
+				selectedDataStoreName), store);
 		form.add(option);
 
 		featureTypeModel = Model.of("FeatureType: "
@@ -90,14 +90,14 @@ public class GSMonitorPage extends GeoServerSecuredPage implements Serializable 
 		featureType.setOutputMarkupId(true);
 		form.add(featureType);
 
-		newFeatureType = new TextField<String>(
-				"newFeatureType", new Model());
+		newFeatureType = new TextField<String>("newFeatureType", Model.of(""));
 		form.add(newFeatureType);
 
 		form.add(new AjaxButton("save", form) {
+			private static final long serialVersionUID=1L;
 
 			protected void onSubmit(AjaxRequestTarget target, Form f) {
-				
+
 				FeatureMonitorDAO dao = holder.getDAO();
 
 				if (!getHolder().isOK()) {
@@ -111,7 +111,6 @@ public class GSMonitorPage extends GeoServerSecuredPage implements Serializable 
 					if (selected != null && dao != null) {
 
 						DataStoreInfo data = null;
-						
 
 						for (DataStoreInfo dsi : getHolder().getDataStores()) {
 
@@ -162,7 +161,7 @@ public class GSMonitorPage extends GeoServerSecuredPage implements Serializable 
 		return holder;
 	}
 
-	public class Holder {
+	public static class Holder {
 
 		Catalog catalog;
 		MonitorConfig config;
