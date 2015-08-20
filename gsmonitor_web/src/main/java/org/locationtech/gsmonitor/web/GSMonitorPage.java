@@ -25,7 +25,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 	private String selectedDataStoreName = "selected";
 	private String message = "";
-	transient Holder holder = null;
+	transient static Holder holder = null;
 	Model<String> adminMessageModel;
 	Label adminMessage;
 	Model<String> dsNameModel;
@@ -36,16 +36,16 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 	TextField<String> newFeatureType;
 
 	public GSMonitorPage() {
-
-		if (!getHolder().isOK()) {
+		
+		if (!getHolder(getApplication()).isOK()) {
 			message = "Monitor cannot be configured due to error. Please consult log files for details.";
 		}
 
-		FeatureMonitorDAO dao = getHolder().getDAO();
-		dao.init(getHolder().getConfig());
+		FeatureMonitorDAO dao = holder.getDAO();
+		dao.init(getHolder(getApplication()).getConfig());
 		String configuredStoreID = dao.getStoreID();
 
-		List<DataStoreInfo> dataStores = getHolder().getDataStores();
+		List<DataStoreInfo> dataStores = getHolder(getApplication()).getDataStores();
 
 		List store = new ArrayList<String>();
 
@@ -69,28 +69,38 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 		adminMessage.setOutputMarkupId(true);
 		add(adminMessage);
 
-		Form form = new Form("form", new Model(this));
+		Form form = new Form("form", new Model(this)){
+			private static final long serialVersionUID=4L;
+		};
 
 		form.setOutputMarkupId(true);
 
 		add(form);
 
 		dsNameModel = Model.of("DataStore in use: " + dao.getStoreID());
-		dsName = new Label("dsName", dsNameModel);
+		dsName = new Label("dsName", dsNameModel){
+			private static final long serialVersionUID=5L;
+		};
 		dsName.setOutputMarkupId(true);
 		form.add(dsName);
 
 		option = new DropDownChoice<String>("options", new Model(
-				selectedDataStoreName), store);
+				selectedDataStoreName), store){
+			private static final long serialVersionUID=4L;
+		};
 		form.add(option);
 
 		featureTypeModel = Model.of("FeatureType: "
 				+ dao.getDataStoreTypeName());
-		featureType = new Label("featureType", featureTypeModel);
+		featureType = new Label("featureType", featureTypeModel){
+			private static final long serialVersionUID=3L;
+		};
 		featureType.setOutputMarkupId(true);
 		form.add(featureType);
 
-		newFeatureType = new TextField<String>("newFeatureType", Model.of(""));
+		newFeatureType = new TextField<String>("newFeatureType", Model.of("")){
+			private static final long serialVersionUID=2L;
+		};
 		form.add(newFeatureType);
 
 		form.add(new AjaxButton("save", form) {
@@ -100,7 +110,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 				FeatureMonitorDAO dao = holder.getDAO();
 
-				if (!getHolder().isOK()) {
+				if (!getHolder(getApplication()).isOK()) {
 					message = "Monitor cannot be configured due to error. Please consult log files for details.";
 					adminMessageModel.setObject("Messages: " + message);
 					target.addComponent(adminMessage);
@@ -112,7 +122,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 						DataStoreInfo data = null;
 
-						for (DataStoreInfo dsi : getHolder().getDataStores()) {
+						for (DataStoreInfo dsi : getHolder(getApplication()).getDataStores()) {
 
 							if (dsi.getName().equals(selected)) {
 								// set the featureType
@@ -154,12 +164,12 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 	}
 
-	public Holder getHolder() {
+	public static Holder getHolder(org.apache.wicket.Application app) {
 		if (holder == null) {
-			holder = new Holder(getCatalog());
+		holder = new Holder(((org.geoserver.web.GeoServerApplication) app).getCatalog());
 		}
 		return holder;
-	}
+		}
 
 	public static class Holder {
 
