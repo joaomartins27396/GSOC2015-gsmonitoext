@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
@@ -22,18 +23,17 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 	private String selectedDataStoreName = "selected";
 	private String message = "";
+	Holder holder = null;
 
 	public GSMonitorPage() {
-
-		// final MonitorConfig config = holder.getCongig(getCatalog());
-
-		final FeatureMonitorDAO dao = holder.getDAO(holder
-				.getCongig(getCatalog()));
-		dao.init(holder.getCongig(getCatalog()));
+		
+		
+		
+		final FeatureMonitorDAO dao = getHolder().getDAO();
+		dao.init(getHolder().getConfig());
 		final String configuredStoreID = dao.getStoreID();
 
-		final List<DataStoreInfo> dataStores = holder
-				.getDataStores(getCatalog());
+		final List<DataStoreInfo> dataStores = getHolder().getDataStores();
 
 		List store = new ArrayList<String>();
 
@@ -87,6 +87,8 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 		form.add(new AjaxButton("save", form) {
 
 			protected void onSubmit(AjaxRequestTarget target, Form f) {
+				
+				
 
 				String selected = option.getModelObject();
 
@@ -103,7 +105,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 							// set the dataStore
 							dao.updateDataStoreProperties(dsi.getName(),
 									dsi.getConnectionParameters());
-							dao.init(holder.getCongig(getCatalog()));
+							dao.init(holder.getConfig());
 
 							message = "Monitor Configured";
 							adminMessageModel.setObject("Messages: " + message);
@@ -133,13 +135,30 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 		});
 
 	}
+	
+	public Holder getHolder(){
+		if (holder == null) {
+			holder = new Holder(getCatalog()); 
+		} 
+		return holder;
+	}
 
-	static public class holder {
-		// FeatureMonitorDAO dao = holder.getDAO(getCatalog());
-		// List<DataStoreInfo> dataStores = holder.getDataStores(getCatalog());
-		// get config
+	public class Holder {
+		
+		
+		Catalog catalog;
+		MonitorConfig config;
+		
+		public Holder(Catalog cat){
+			this.catalog = cat;
+			try {
+				this.config = new MonitorConfig(catalog.getResourceLoader());
+			} catch (IOException e) {
+				LOGGER.log(Level.SEVERE, "Impossible to Initialize the Holder", e);
+			}
+		}
 
-		public static FeatureMonitorDAO getDAO(MonitorConfig config) {
+		public FeatureMonitorDAO getDAO() {
 			try {
 				return FeatureMonitorDAO.lookupMonitor(config);
 			} catch (IOException e) {
@@ -147,16 +166,16 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 			}
 		}
 
-		public static List<DataStoreInfo> getDataStores(Catalog cat) {
-			return cat.getStores(DataStoreInfo.class);
+		public List<DataStoreInfo> getDataStores() {
+			return catalog.getStores(DataStoreInfo.class);
 		}
 
-		public static MonitorConfig getCongig(Catalog cat) {
-			try {
-				return new MonitorConfig(cat.getResourceLoader());
-			} catch (IOException e) {
-				return null;
-			}
+		public MonitorConfig getConfig() {
+			return config;
+		}
+		
+		public boolean isOK(){
+			return config!=null;
 		}
 
 	}
