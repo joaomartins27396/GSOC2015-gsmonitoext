@@ -19,7 +19,7 @@ import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.web.GeoServerSecuredPage;
 import org.locationtech.gsmonitor.*;
 
-public class GSMonitorPage extends GeoServerSecuredPage {
+public class GSMonitorPage extends GeoServerSecuredPage implements Serializable {
 
 	private String selectedDataStoreName = "selected";
 	private String message = "";
@@ -162,7 +162,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 		return holder;
 	}
 
-	public class Holder implements Serializable {
+	public class Holder {
 
 		Catalog catalog;
 		MonitorConfig config;
