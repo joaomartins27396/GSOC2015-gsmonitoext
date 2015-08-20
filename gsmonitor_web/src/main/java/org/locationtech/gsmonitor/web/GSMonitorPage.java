@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.Model;
+import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.monitor.MonitorConfig;
 import org.geoserver.web.GeoServerSecuredPage;
@@ -24,120 +25,138 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 	public GSMonitorPage() {
 
-		try {
-			final MonitorConfig config = new MonitorConfig(getCatalog()
-					.getResourceLoader());
+		// final MonitorConfig config = holder.getCongig(getCatalog());
 
-			final FeatureMonitorDAO dao = FeatureMonitorDAO
-					.lookupMonitor(config);
-			dao.init(config);
-			final String configuredStoreID = dao.getStoreID();
+		final FeatureMonitorDAO dao = holder.getDAO(holder
+				.getCongig(getCatalog()));
+		dao.init(holder.getCongig(getCatalog()));
+		final String configuredStoreID = dao.getStoreID();
 
-			final List<DataStoreInfo> dataStores = getCatalog().getStores(
+		final List<DataStoreInfo> dataStores = holder
+				.getDataStores(getCatalog());
 
-			DataStoreInfo.class);
+		List store = new ArrayList<String>();
 
-			List store = new ArrayList<String>();
+		if (dataStores != null) {
 
-			if (dataStores != null) {
+			for (DataStoreInfo dataStore : dataStores) {
 
-				for (DataStoreInfo dataStore : dataStores) {
+				if (dataStore != null && dataStore.isEnabled()) {
 
-					if (dataStore != null && dataStore.isEnabled()) {
-
-						store.add(dataStore.getName());
-						if (dataStore.getName().equals(configuredStoreID))
-							selectedDataStoreName = dataStore.getName();
-
-					}
+					store.add(dataStore.getName());
+					if (dataStore.getName().equals(configuredStoreID))
+						selectedDataStoreName = dataStore.getName();
 
 				}
 
 			}
-			final Model<String> adminMessageModel = Model.of("Messages: "
-					+ message);
-			final Label adminMessage = new Label("adminMessage",
-					adminMessageModel);
-			adminMessage.setOutputMarkupId(true);
-			add(adminMessage);
 
-			Form form = new Form("form", new Model(this));
+		}
+		final Model<String> adminMessageModel = Model
+				.of("Messages: " + message);
+		final Label adminMessage = new Label("adminMessage", adminMessageModel);
+		adminMessage.setOutputMarkupId(true);
+		add(adminMessage);
 
-			form.setOutputMarkupId(true);
+		Form form = new Form("form", new Model(this));
 
-			add(form);
+		form.setOutputMarkupId(true);
 
-			final Model<String> dsNameModel = Model.of("DataStore in use: "
-					+ dao.getStoreID());
-			final Label dsName = new Label("dsName", dsNameModel);
-			dsName.setOutputMarkupId(true);
-			form.add(dsName);
+		add(form);
 
-			final DropDownChoice<String> option = new DropDownChoice<String>(
-					"options", new Model(selectedDataStoreName), store);
-			form.add(option);
+		final Model<String> dsNameModel = Model.of("DataStore in use: "
+				+ dao.getStoreID());
+		final Label dsName = new Label("dsName", dsNameModel);
+		dsName.setOutputMarkupId(true);
+		form.add(dsName);
 
-			final Model<String> featureTypeModel = Model.of("FeatureType: "
-					+ dao.getDataStoreTypeName());
-			final Label featureType = new Label("featureType", featureTypeModel);
-			featureType.setOutputMarkupId(true);
-			form.add(featureType);
+		final DropDownChoice<String> option = new DropDownChoice<String>(
+				"options", new Model(selectedDataStoreName), store);
+		form.add(option);
 
-			final TextField<String> newFeatureType = new TextField<String>(
-					"newFeatureType", new Model());
-			form.add(newFeatureType);
+		final Model<String> featureTypeModel = Model.of("FeatureType: "
+				+ dao.getDataStoreTypeName());
+		final Label featureType = new Label("featureType", featureTypeModel);
+		featureType.setOutputMarkupId(true);
+		form.add(featureType);
 
-			form.add(new AjaxButton("save", form) {
+		final TextField<String> newFeatureType = new TextField<String>(
+				"newFeatureType", new Model());
+		form.add(newFeatureType);
 
-				protected void onSubmit(AjaxRequestTarget target, Form f) {
+		form.add(new AjaxButton("save", form) {
 
-					String selected = option.getModelObject();
+			protected void onSubmit(AjaxRequestTarget target, Form f) {
 
-					if (selected != null) {
+				String selected = option.getModelObject();
 
-						DataStoreInfo data = null;
+				if (selected != null && dao!=null) {
 
-						for (DataStoreInfo dsi : dataStores) {
+					DataStoreInfo data = null;
 
-							if (dsi.getName().equals(selected)) {
-								// set the featureType
-								dao.setDataStoreTypeName(newFeatureType
-										.getInputName());
-								// set the dataStore
-								dao.updateDataStoreProperties(dsi.getName(),
-										dsi.getConnectionParameters());
-								dao.init(config);
+					for (DataStoreInfo dsi : dataStores) {
 
-								message = "Monitor Configured";
-								adminMessageModel.setObject("Messages: "
-										+ message);
-								target.addComponent(adminMessage);
+						if (dsi.getName().equals(selected)) {
+							// set the featureType
+							dao.setDataStoreTypeName(newFeatureType
+									.getInputName());
+							// set the dataStore
+							dao.updateDataStoreProperties(dsi.getName(),
+									dsi.getConnectionParameters());
+							dao.init(holder.getCongig(getCatalog()));
 
-								featureTypeModel.setObject("FeatureType: "
-										+ dao.getDataStoreTypeName());
-								target.addComponent(featureType);
+							message = "Monitor Configured";
+							adminMessageModel.setObject("Messages: " + message);
+							target.addComponent(adminMessage);
 
-								dsNameModel.setObject("DataStore in use: "
-										+ dao.getStoreID());
-								target.addComponent(dsName);
+							featureTypeModel.setObject("FeatureType: "
+									+ dao.getDataStoreTypeName());
+							target.addComponent(featureType);
 
-								return;
-							}
+							dsNameModel.setObject("DataStore in use: "
+									+ dao.getStoreID());
+							target.addComponent(dsName);
 
+							return;
 						}
-
-						message = "Data Store not valid";
-						adminMessageModel.setObject("Messages: " + message);
-						target.addComponent(adminMessage);
 
 					}
 
+					message = "Data Store not valid";
+					adminMessageModel.setObject("Messages: " + message);
+					target.addComponent(adminMessage);
+
 				}
 
-			});
-		} catch (IOException e1) {
-			LOGGER.log(Level.SEVERE, "Monitor Configure Can't be Initialised",
-					e1);
+			}
+
+		});
+
+	}
+
+	static public class holder {
+		// FeatureMonitorDAO dao = holder.getDAO(getCatalog());
+		// List<DataStoreInfo> dataStores = holder.getDataStores(getCatalog());
+		// get config
+
+		public static FeatureMonitorDAO getDAO(MonitorConfig config) {
+			try {
+				return FeatureMonitorDAO.lookupMonitor(config);
+			} catch (IOException e) {
+				return null;
+			}
+		}
+
+		public static List<DataStoreInfo> getDataStores(Catalog cat) {
+			return cat.getStores(DataStoreInfo.class);
+		}
+
+		public static MonitorConfig getCongig(Catalog cat) {
+			try {
+				return new MonitorConfig(cat.getResourceLoader());
+			} catch (IOException e) {
+				return null;
+			}
 		}
 
 	}
