@@ -1,11 +1,11 @@
 package org.locationtech.gsmonitor.web;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
@@ -23,7 +23,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 	private String selectedDataStoreName = "selected";
 	private String message = "";
-	Holder holder = null;
+	transient Holder holder = null;
 	Model<String> adminMessageModel;
 	Label adminMessage ;
 	Model<String> dsNameModel;
@@ -162,7 +162,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 		return holder;
 	}
 
-	public class Holder {
+	public class Holder implements Serializable {
 
 		Catalog catalog;
 		MonitorConfig config;
