@@ -41,7 +41,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 			message = "Monitor cannot be configured due to error. Please consult log files for details.";
 		}
 
-		FeatureMonitorDAO dao = holder.getDAO();
+		FeatureMonitorDAO dao = getHolder(getApplication()).getDAO();
 		dao.init(getHolder(getApplication()).getConfig());
 		String configuredStoreID = dao.getStoreID();
 
@@ -108,7 +108,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 			protected void onSubmit(AjaxRequestTarget target, Form f) {
 
-				FeatureMonitorDAO dao = holder.getDAO();
+				FeatureMonitorDAO dao = getHolder(getApplication()).getDAO();
 
 				if (!getHolder(getApplication()).isOK()) {
 					message = "Monitor cannot be configured due to error. Please consult log files for details.";
