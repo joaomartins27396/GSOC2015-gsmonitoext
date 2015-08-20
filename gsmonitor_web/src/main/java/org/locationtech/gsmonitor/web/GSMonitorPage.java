@@ -26,9 +26,11 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 	Holder holder = null;
 
 	public GSMonitorPage() {
-		
-		
-		
+
+		if (!getHolder().isOK()) {
+			message = "Monitor cannot be configured due to error. Please consult log files for details.";
+		}
+
 		final FeatureMonitorDAO dao = getHolder().getDAO();
 		dao.init(getHolder().getConfig());
 		final String configuredStoreID = dao.getStoreID();
@@ -87,46 +89,52 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 		form.add(new AjaxButton("save", form) {
 
 			protected void onSubmit(AjaxRequestTarget target, Form f) {
-				
-				
 
-				String selected = option.getModelObject();
-
-				if (selected != null && dao!=null) {
-
-					DataStoreInfo data = null;
-
-					for (DataStoreInfo dsi : dataStores) {
-
-						if (dsi.getName().equals(selected)) {
-							// set the featureType
-							dao.setDataStoreTypeName(newFeatureType
-									.getInputName());
-							// set the dataStore
-							dao.updateDataStoreProperties(dsi.getName(),
-									dsi.getConnectionParameters());
-							dao.init(holder.getConfig());
-
-							message = "Monitor Configured";
-							adminMessageModel.setObject("Messages: " + message);
-							target.addComponent(adminMessage);
-
-							featureTypeModel.setObject("FeatureType: "
-									+ dao.getDataStoreTypeName());
-							target.addComponent(featureType);
-
-							dsNameModel.setObject("DataStore in use: "
-									+ dao.getStoreID());
-							target.addComponent(dsName);
-
-							return;
-						}
-
-					}
-
-					message = "Data Store not valid";
+				if (!getHolder().isOK()) {
+					message = "Monitor cannot be configured due to error. Please consult log files for details.";
 					adminMessageModel.setObject("Messages: " + message);
 					target.addComponent(adminMessage);
+				} else {
+
+					String selected = option.getModelObject();
+
+					if (selected != null && dao != null) {
+
+						DataStoreInfo data = null;
+
+						for (DataStoreInfo dsi : dataStores) {
+
+							if (dsi.getName().equals(selected)) {
+								// set the featureType
+								dao.setDataStoreTypeName(newFeatureType
+										.getInputName());
+								// set the dataStore
+								dao.updateDataStoreProperties(dsi.getName(),
+										dsi.getConnectionParameters());
+								dao.init(holder.getConfig());
+
+								message = "Monitor Configured";
+								adminMessageModel.setObject("Messages: "
+										+ message);
+								target.addComponent(adminMessage);
+
+								featureTypeModel.setObject("FeatureType: "
+										+ dao.getDataStoreTypeName());
+								target.addComponent(featureType);
+
+								dsNameModel.setObject("DataStore in use: "
+										+ dao.getStoreID());
+								target.addComponent(dsName);
+
+								return;
+							}
+
+						}
+
+						message = "Data Store not valid";
+						adminMessageModel.setObject("Messages: " + message);
+						target.addComponent(adminMessage);
+					}
 
 				}
 
@@ -135,26 +143,26 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 		});
 
 	}
-	
-	public Holder getHolder(){
+
+	public Holder getHolder() {
 		if (holder == null) {
-			holder = new Holder(getCatalog()); 
-		} 
+			holder = new Holder(getCatalog());
+		}
 		return holder;
 	}
 
 	public class Holder {
-		
-		
+
 		Catalog catalog;
 		MonitorConfig config;
-		
-		public Holder(Catalog cat){
+
+		public Holder(Catalog cat) {
 			this.catalog = cat;
 			try {
 				this.config = new MonitorConfig(catalog.getResourceLoader());
 			} catch (IOException e) {
-				LOGGER.log(Level.SEVERE, "Impossible to Initialize the Holder", e);
+				LOGGER.log(Level.SEVERE, "Impossible to Initialize the Holder",
+						e);
 			}
 		}
 
@@ -173,9 +181,9 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 		public MonitorConfig getConfig() {
 			return config;
 		}
-		
-		public boolean isOK(){
-			return config!=null;
+
+		public boolean isOK() {
+			return config != null;
 		}
 
 	}
