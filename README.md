@@ -55,3 +55,14 @@ Copy the target jar file from gsmonitor_web/target directory to the GeoServer's 
 % cp .\gsmonitor_web\target\gsmonitor_web-0.0.1-SNAPSHOT.jar  E:\geoserver-2.7.0-bin\webapps\geoserver\WEB-INF\lib
 ```
 ### Using the Tool
+The tool presents a set of enabled data store configured in GeoServer.  A selected data store will receive meta-data for each map request.  _Caution: the tool does not remove read-only data stores from the selection set_.
+
+The user may also change the feature type name that defines the map request features.  Feature type names should be made up of word characters.
+
+The currently configured data store and feature type name are presented in the tool.   If 'NA' is shown as the configured data store, then either the monitor is not functioning or the data store parameters are independently defined featureMonitor.properties file, and not directly aligned with a GeoServer configured data store.  
+
+Saving the changes to this page automatically takes effect and updates the featureMonitor.properties.  If no change is desired, leave the feature type name blank and leave the currently select data store as shown. 
+
+**Do not use this tool unless the intension is to use a GeoServer configured Data Store.**
+
+
