@@ -113,6 +113,11 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	}
 
 	public void setDataStoreTypeName(String dataStoreTypeName) {
+		if (dataStoreTypeName == null || dataStoreTypeName.length() == 0) {
+			LOGGER.log(Level.WARNING,
+					"Tried to set the Feature Type name to an null or empty value");
+			return;
+		}
 		this.dataStoreTypeName = dataStoreTypeName;
 	}
 
@@ -123,8 +128,10 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	private void setDataStoreParams(Map<String, Serializable> dataStoreParams) {
 		this.dataStoreParams = dataStoreParams;
 		if (dataStoreParams.containsKey(TYPENAME_PROP_NAME)) {
-			this.dataStoreTypeName = dataStoreParams.get(TYPENAME_PROP_NAME)
+			String typeName = dataStoreParams.get(TYPENAME_PROP_NAME)
 					.toString();
+			this.dataStoreTypeName = typeName.length() > 0 ? typeName
+					: dataStoreTypeName;
 			this.featureType = null;
 			this.initType();
 		}
@@ -304,7 +311,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 				while ((out = bufferReader.readLine()) != null) {
 					if (out.length() > 0 && out.toCharArray()[0] != '#') {
 						String[] newParams = out.split("=");
-						params.put(newParams[0].trim(), newParams[1].trim());
+						if (newParams.length > 1)
+							params.put(newParams[0].trim(), newParams[1].trim());
 					}
 				}
 				setDataStoreParams(params);
@@ -639,6 +647,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	@Override
 	public void save(RequestData data) {
 
+		if (dataStore == null)
+			return;
 		Transaction t = new DefaultTransaction("handle");
 		try (FeatureWriter<SimpleFeatureType, SimpleFeature> fw = dataStore
 				.getFeatureWriterAppend(dataStoreTypeName, t)) {
@@ -667,6 +677,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 
 	@Override
 	public RequestData getRequest(long id) {
+		if (dataStore == null)
+			return null;
 		Transaction t = new DefaultTransaction("handle");
 
 		FilterFactoryImpl factory = new FilterFactoryImpl();
@@ -833,6 +845,9 @@ public class FeatureMonitorDAO implements MonitorDAO {
 
 		List<RequestData> list = new LinkedList<RequestData>();
 
+		if (dataStore == null)
+			return list;
+
 		Transaction t = new DefaultTransaction("handle");
 
 		try (FeatureReader<SimpleFeatureType, SimpleFeature> fw = dataStore
@@ -873,6 +888,8 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	public long getCount(org.geoserver.monitor.Query query) {
 
 		int count = 0;
+		if (dataStore == null)
+			return count;
 		Transaction t = new DefaultTransaction("handle");
 
 		try (FeatureReader<SimpleFeatureType, SimpleFeature> fw = dataStore

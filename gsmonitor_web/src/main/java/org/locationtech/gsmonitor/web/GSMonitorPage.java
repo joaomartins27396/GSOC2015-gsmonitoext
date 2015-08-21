@@ -23,119 +23,114 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 	public static final long serialVersionUID = 438L;
 
-	private String selectedDataStoreName = "selected";
+	private String selectedDataStoreName = "NA";
 	private String message = "";
-	transient static Holder holder = null;
-	Model<String> adminMessageModel;
-	Label adminMessage;
-	Model<String> dsNameModel;
-	Label dsName;
-	DropDownChoice<String> option;
-	Model<String> featureTypeModel;
-	Label featureType;
-	TextField<String> newFeatureType;
+	transient Holder holder = null;
+	private Model<String> adminMessageModel;
+	private Label adminMessage;
+	private Model<String> dsNameModel;
+	private Label dsName;
+	private DropDownChoice<String> option;
+	private Model<String> featureTypeModel;
+	private Label featureType;
+	private TextField<String> newFeatureType;
 
 	public GSMonitorPage() {
-		
+
+		List<String> store = new ArrayList<String>();
+
+		String featureTypeName = "";
 		if (!getHolder(getApplication()).isOK()) {
 			message = "Monitor cannot be configured due to error. Please consult log files for details.";
-		}
+		} else {
+			FeatureMonitorDAO dao = getHolder(getApplication()).getDAO();
+			dao.init(getHolder(getApplication()).getConfig());
+			String configuredStoreID = dao.getStoreID();
 
-		FeatureMonitorDAO dao = getHolder(getApplication()).getDAO();
-		dao.init(getHolder(getApplication()).getConfig());
-		String configuredStoreID = dao.getStoreID();
+			List<DataStoreInfo> dataStores = getHolder(getApplication())
+					.getDataStores();
 
-		List<DataStoreInfo> dataStores = getHolder(getApplication()).getDataStores();
+			if (dataStores != null) {
 
-		List store = new ArrayList<String>();
+				for (DataStoreInfo dataStore : dataStores) {
 
-		if (dataStores != null) {
+					if (dataStore != null && dataStore.isEnabled()) {
 
-			for (DataStoreInfo dataStore : dataStores) {
-
-				if (dataStore != null && dataStore.isEnabled()) {
-
-					store.add(dataStore.getName());
-					if (dataStore.getName().equals(configuredStoreID))
-						selectedDataStoreName = dataStore.getName();
+						store.add(dataStore.getName());
+						if (dataStore.getName().equals(configuredStoreID))
+							selectedDataStoreName = dataStore.getName();
+					}
 
 				}
-
 			}
-
+			featureTypeName = dao.getDataStoreTypeName();
 		}
+
 		adminMessageModel = Model.of("Messages: " + message);
 		adminMessage = new Label("adminMessage", adminMessageModel);
 		adminMessage.setOutputMarkupId(true);
 		add(adminMessage);
-
-		Form form = new Form("form", new Model(this)){
-			private static final long serialVersionUID=4L;
-		};
+		
+		Form form = new Form("form", new Model(this));
 
 		form.setOutputMarkupId(true);
 
 		add(form);
 
-		dsNameModel = Model.of("DataStore in use: " + dao.getStoreID());
-		dsName = new Label("dsName", dsNameModel){
-			private static final long serialVersionUID=5L;
+		dsNameModel = Model.of("DataStore in use: " + selectedDataStoreName);
+		dsName = new Label("dsName", dsNameModel) {
+			private static final long serialVersionUID = 5L;
 		};
 		dsName.setOutputMarkupId(true);
 		form.add(dsName);
 
-		option = new DropDownChoice<String>("options", new Model(
-				selectedDataStoreName), store){
-			private static final long serialVersionUID=4L;
-		};
+		option = new DropDownChoice<String>("options",
+				Model.of(selectedDataStoreName), store);
 		form.add(option);
 
-		featureTypeModel = Model.of("FeatureType: "
-				+ dao.getDataStoreTypeName());
-		featureType = new Label("featureType", featureTypeModel){
-			private static final long serialVersionUID=3L;
-		};
+		featureTypeModel = Model.of("FeatureType: " + featureTypeName);
+		featureType = new Label("featureType", featureTypeModel);
 		featureType.setOutputMarkupId(true);
 		form.add(featureType);
 
-		newFeatureType = new TextField<String>("newFeatureType", new Model(Model.of(""))){
-			private static final long serialVersionUID=2L;
-		};
+		newFeatureType = new TextField<String>("newFeatureType", Model.of(""));
+
 		form.add(newFeatureType);
 
 		form.add(new AjaxButton("save", form) {
-			private static final long serialVersionUID=1L;
+			private static final long serialVersionUID = 1L;
 
 			protected void onSubmit(AjaxRequestTarget target, Form f) {
 
-				FeatureMonitorDAO dao = getHolder(getApplication()).getDAO();
-				
 				if (!getHolder(getApplication()).isOK()) {
 					message = "Monitor cannot be configured due to error. Please consult log files for details.";
 					adminMessageModel.setObject("Messages: " + message);
 					target.addComponent(adminMessage);
 				} else {
-
-					String selected = option.getModelObject();
+					final FeatureMonitorDAO dao = getHolder(getApplication())
+							.getDAO();
+					final String selected = option.getModelObject();
 					if (selected != null && dao != null) {
+						for (DataStoreInfo dsi : getHolder(getApplication())
+								.getDataStores()) {
 
-						DataStoreInfo data = null;
-						
-						for (DataStoreInfo dsi : getHolder(getApplication()).getDataStores()) {
-							
 							if (dsi.getName().equals(selected)) {
 								// set the featureType
-								String ftype = newFeatureType.getDefaultModelObjectAsString();
-								dao.setDataStoreTypeName(ftype);
-								
+								String ftype = newFeatureType
+										.getDefaultModelObjectAsString();
+								if (ftype != null && ftype.length() > 0) {
+									dao.setDataStoreTypeName(ftype.replaceAll(
+											"\\W", ""));
+								}
+
 								// set the dataStore
 								dao.updateDataStoreProperties(dsi.getName(),
 										dsi.getConnectionParameters());
-								dao.init(holder.getConfig());
+								dao.init(getHolder(getApplication())
+										.getConfig());
 
-								message = "Monitor Configured";
-								adminMessageModel.setObject("Messages: "
-										+ message);
+								adminMessageModel
+										.setObject("Messages: Monitor Configured");
 								target.addComponent(adminMessage);
 
 								featureTypeModel.setObject("FeatureType: "
@@ -164,12 +159,13 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 
 	}
 
-	public static Holder getHolder(org.apache.wicket.Application app) {
+	public Holder getHolder(org.apache.wicket.Application app) {
 		if (holder == null) {
-		holder = new Holder(((org.geoserver.web.GeoServerApplication) app).getCatalog());
+			holder = new Holder(
+					((org.geoserver.web.GeoServerApplication) app).getCatalog());
 		}
 		return holder;
-		}
+	}
 
 	public static class Holder {
 
