@@ -65,7 +65,7 @@ public class FeatureMonitorDAO implements MonitorDAO {
 	public static final String FEATURE_PROP_FILENAME = "featureMonitor.properties";
 	public static final int MAX_SIZE = 255;
 	private DataStore dataStore = null;
-	private String dataStoreName = null;
+	private String dataStoreName = "";
 	private MonitorConfig config;
 	private boolean configured = false;
 
@@ -185,14 +185,13 @@ public class FeatureMonitorDAO implements MonitorDAO {
 								this.featureType.getName())) {
 							dataStore.createSchema(this.featureType);
 						}
-					}
-					dataStoreName = (String) params.get(DSID_PROP_NAME);
-
+						dataStoreName = (String) params.get(DSID_PROP_NAME);
+						return;
+					}					
 				} catch (Throwable warning) {
 					LOGGER.warning(factory.getDisplayName() + " failed:"
 							+ warning);
 					warning.printStackTrace();
-
 				}
 			}
 		}
