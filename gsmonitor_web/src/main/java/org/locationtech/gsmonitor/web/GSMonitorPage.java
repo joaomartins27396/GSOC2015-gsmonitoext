@@ -98,7 +98,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 		featureType.setOutputMarkupId(true);
 		form.add(featureType);
 
-		newFeatureType = new TextField<String>("newFeatureType", Model.of("")){
+		newFeatureType = new TextField<String>("newFeatureType", new Model(Model.of(""))){
 			private static final long serialVersionUID=2L;
 		};
 		form.add(newFeatureType);
@@ -109,7 +109,7 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 			protected void onSubmit(AjaxRequestTarget target, Form f) {
 
 				FeatureMonitorDAO dao = getHolder(getApplication()).getDAO();
-
+				
 				if (!getHolder(getApplication()).isOK()) {
 					message = "Monitor cannot be configured due to error. Please consult log files for details.";
 					adminMessageModel.setObject("Messages: " + message);
@@ -117,17 +117,17 @@ public class GSMonitorPage extends GeoServerSecuredPage {
 				} else {
 
 					String selected = option.getModelObject();
-
 					if (selected != null && dao != null) {
 
 						DataStoreInfo data = null;
-
+						
 						for (DataStoreInfo dsi : getHolder(getApplication()).getDataStores()) {
-
+							
 							if (dsi.getName().equals(selected)) {
 								// set the featureType
-								dao.setDataStoreTypeName(newFeatureType
-										.getInputName());
+								String ftype = newFeatureType.getDefaultModelObjectAsString();
+								dao.setDataStoreTypeName(ftype);
+								
 								// set the dataStore
 								dao.updateDataStoreProperties(dsi.getName(),
 										dsi.getConnectionParameters());
